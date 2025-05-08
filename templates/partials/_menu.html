@@ -1,0 +1,16 @@
+<!-- healthcare/templates/partials/_menu.html -->
+
+    <table class="menu">
+        <tr>
+            {% if 'id' in session %}
+                <td><a href="{{ url_for('logout') }}"><button>Déconnexion</button></a></td>
+            {% endif %}
+            <td><a href="{{ url_for('welcome') }}"><button>Menu principal</button></a></td>
+            {% if request.endpoint in ('show_health_data', 'new_health_data') %}
+                <td><a href="{{ url_for('show_patients') }}">
+                    <button>Retour patients</button>
+                </a></td>
+            {% endif %}
+        </tr>
+    </table>
+

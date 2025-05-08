@@ -1,0 +1,32 @@
+<!-- healthcare/templates/sessions.html -->
+
+{% extends 'base.html' %}
+{% block main %}
+<main>
+    {% include './partials/_menu.html' %}
+    {% if sessions %}
+    <table class="sessions">
+        <thead>
+        <tr>
+            <th>Login</th>
+            <th>Début</th>
+            <th>Navigateur</th>
+            <th>Adresse IP</th>
+        </tr>
+        </thead>
+        {% for session in sessions %}
+        <div id="session">
+            <tr>
+                <td>{{ session.username }}</td>
+                <td>{{ session.start|format_paris_time }}</td>
+                <td>{{ session.browser_family }} (version {{ session.browser_version }})</td>
+                <td>{{ session.client_ip }}</td>
+            </tr>
+        </div>
+        {%endfor %}
+    </table>
+    {% else %}
+    <p style="font-size: 16px; text-align: center;">Pas de session en cours ✌️</p>
+    {% endif %}
+</main>
+{% endblock main %}

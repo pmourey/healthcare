@@ -1,0 +1,23 @@
+<!-- healthcare/templates/new_patient.html -->
+
+{% extends 'base.html' %}
+{% include './partials/_menu.html' %}
+
+
+{% block main %}
+<main>
+    <h2>Données de santé - {{ patient.first_name }} {{ patient.last_name }}</h2>
+    <div>
+        <form method="POST" action="{{ url_for('new_health_data', id=patient.id) }}">
+            <input type=number placeholder="Poids" name="weight" value="{{ request.form.weight }}">
+            <input type=number placeholder="Taille" name="height" value="{{ request.form.height }}">
+            <input type=number placeholder="Pulsation cardiaque" name="heart_rate" value="{{ request.form.heart_rate }}">
+            <input type=number placeholder="Pression artérielle" name="blood_pressure" value="{{ request.form.blood_pressure }}">
+            <input type=number placeholder="Température" name="temperature" value="{{ request.form.temperature }}">
+            <textarea name="notes" placeholder="Notes" rows="4" class="full-width-textarea">{{ request.form.notes }}</textarea>
+            <input type="submit" value="Create">
+        </form>
+    </div>
+    {% if error %}<p class="error"><strong>Error:</strong> {{ error }} {% endif %}
+</main>
+{% endblock main %}

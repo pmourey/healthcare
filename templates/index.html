@@ -1,0 +1,37 @@
+<!-- healthcare/templates/index.html -->
+
+{% extends 'base.html' %}
+{% block main %}
+<main>
+    <!-- Votre contenu de page ici -->
+    {% if 'login_id' in session %}
+        <p>Bienvenue, {{user.username}}!</p>
+        <table class="welcome">
+            <tr>
+                <td><a href="{{ url_for('new_patient') }}">Nouveau patient</a></td>
+            </tr>
+            <tr>
+                <td><a href="{{ url_for('show_patients') }}">Liste patients</a></td>
+            </tr>
+            {% if user.is_admin %}
+            <tr>
+                <td><a href="{{ url_for('show_sessions') }}">Sessions ouvertes</a></td>
+            </tr>
+            <tr>
+                <td><a href="{{ url_for('show_accounts') }}">Gestion comptes utilisateurs</a></td>
+            </tr>
+            {% endif %}
+            <tr>
+                <td><a href="{{ url_for('reset_password', token=token) }}">Changement mot de passe</a></td>
+            </tr>
+            <tr>
+                <td><a href="{{ url_for('logout') }}">Déconnexion</a></td>
+            </tr>
+        </table>
+    {% else %}
+        <p>Vous n'êtes pas connecté.</p>
+        <p><a href="{{ url_for('login') }}">Veuillez vous identifier!</a>.</p>
+        <!-- Autres éléments pour les utilisateurs non connectés -->
+    {% endif %}
+</main>
+{% endblock main %}

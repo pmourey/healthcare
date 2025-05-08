@@ -1,0 +1,60 @@
+<!-- healthcare/templates/accounts.html -->
+
+{% extends 'base.html' %}
+{% block main %}
+<script>
+    function confirmDelete(userId) {
+        var result = confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?");
+        if (result) {
+            window.location.href = "delete_account/" + userId;
+        }
+    }
+</script>
+<main>
+    {% include './partials/_menu.html' %}
+    {% if accounts %}
+    <table class="accounts">
+        <thead>
+        <tr>
+            {% if user.is_admin %}
+            <th>Update</th>
+            <th>Delete</th>
+            {% endif %}
+            <th>Login</th>
+            <th>Date création</th>
+            <th>Type</th>
+        </tr>
+        </thead>
+        {% for account in accounts %}
+        <div id="account">
+            <tr>
+                {% if user.is_admin %}
+                <td align="center">
+                    {% if user.id != account.id %}
+                    <a href="{{ url_for('update_account', id=account.id) }}">{{account.id}}</a>
+                    {% endif %}
+                </td>
+                <td align="center">
+                    {% if user.id != account.id %}
+                    <button onclick="confirmDelete({{ account.id }})">{{account.id}}</button>
+                    {% endif %}
+                </td>
+                {% endif %}
+                <td>{{ account.username }}</td>
+                <td>{{ account.creationDate|format_paris_time }}</td>
+                <td>
+                    {% if account.is_admin %}
+                        Administrateur
+                    {% elif account.is_editor %}
+                        Editeur
+                    {% else %}
+                        Utilisateur
+                    {% endif %}
+                </td>
+            </tr>
+        </div>
+        {%endfor %}
+    </table>
+    {% endif %}
+</main>
+{% endblock main %}

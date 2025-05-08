@@ -1,0 +1,15 @@
+<!-- jobs/templates/partials/_form.html -->
+
+<form action="{{ url_for('new') }}" , method="POST">
+    <table class="add-form">
+        <tr>
+            <td><input type="text" name="name" placeholder="Job"></td>
+            <td><input type="text" name="url" placeholder="Url"></td>
+            <td><input type="text" name="zipCode" placeholder="zipCode"></td>
+            <td><input type="text" name="company" placeholder="Company"></td>
+            <td><input type="text" name="contact" placeholder="Contact"></td>
+            <td><input type="email" name="email" placeholder="E-Mail"/></td>
+            <td><input type="submit" value="Ajout candidature"></td>
+        </tr>
+    </table>
+</form>

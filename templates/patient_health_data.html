@@ -1,0 +1,40 @@
+<!-- healthcare/templates/patients.html -->
+
+{% extends 'base.html' %}
+{% include './partials/_menu.html' %}
+
+{% block main %}
+<main>
+    {% if patient.health_data %}
+    <h2>Données de santé - {{ patient.first_name }} {{ patient.last_name }}</h2>
+    <table class="jobs">
+        <thead>
+        <tr>
+            <th>Date visite</th>
+            <th>Poids</th>
+            <th>Taille</th>
+            <th>Pulsation cardiaque</th>
+            <th>Pression artérielle</th>
+            <th>Température</th>
+            <th>Infos diverses</th>
+        </tr>
+        </thead>
+        {% for data in patient.health_data %}
+        <div id="job">
+            <tr>
+                <td>{{ data.creation_date.strftime('%A %d %B %Y') }}</td>
+                <td>{{ data.weight }}</td>
+                <td>{{ data.height }}</td>
+                <td>{{ data.heart_rate }}</td>
+                <td>{{ data.blood_pressure }}</td>
+                <td>{{ data.temperature }}</td>
+                <td>{{ data.notes }}</td>
+            </tr>
+        </div>
+        {%endfor %}
+    </table>
+    {% else %}
+    <p style="font-size: 16px; text-align: center;">Aucune donnée de santé connue pour {{ patient.firstname }} {{ patient.lastname }} ✌️</p>
+    {% endif %}
+</main>
+{% endblock main %}

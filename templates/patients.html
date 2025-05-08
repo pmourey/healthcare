@@ -1,0 +1,40 @@
+<!-- healthcare/templates/patients.html -->
+
+{% extends 'base.html' %}
+{% include './partials/_menu.html' %}
+
+{% block main %}
+<main>
+    {% if patients %}
+    <h2>Liste des patients du Docteur {{ user.username }} :-)</h2>
+    <table class="jobs">
+        <thead>
+        <tr>
+            <th>Action</th>
+            <th>Action</th>
+            <th>Prénom</th>
+            <th>Nom</th>
+            <th>E-Mail</th>
+            <th>Téléphone</th>
+            <th>Date création</th>
+        </tr>
+        </thead>
+        {% for patient in patients %}
+        <div id="job">
+            <tr>
+                <td><button><a href="{{ url_for('show_health_data', id=patient.id) }}" class="button">Historique visites</a></button></td>
+                <td><button><a href="{{ url_for('new_health_data', id=patient.id) }}" class="button">Nouvelle visite</a></button></td>
+                <td>{{ patient.first_name }}</td>
+                <td>{{ patient.last_name }}</td>
+                <td>{{ patient.email }}</td>
+                <td>{{ patient.phone }}</td>
+                <td>{{patient.creation_date.strftime('%A %d %B %Y')}}</td>
+            </tr>
+        </div>
+        {%endfor %}
+    </table>
+    {% else %}
+    <p style="font-size: 16px; text-align: center;">Aucun patient défini pour le Docteur {{ user.username }} ✌️</p>
+    {% endif %}
+</main>
+{% endblock main %}
