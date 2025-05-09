@@ -25,6 +25,7 @@ import locale
 from datetime import datetime, timedelta
 
 from decorators import is_connected, is_admin
+from tools.send_emails import send_email
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 # Set the secret key
@@ -406,6 +407,38 @@ def show_patients():
 	patients = Patient.query.order_by(desc(Patient.id)).all()
 	app.logger.debug(f'patients: {patients}')
 	return render_template('patients.html', patients=patients, user=get_user_by_id(session['login_id']))
+
+
+
+@app.route('/patient/<int:patient_id>/send-reports', methods=['POST'])
+@is_connected
+def send_health_reports(patient_id):
+	selected_reports = request.form.getlist('selected_reports')
+	patient = Patient.query.get_or_404(patient_id)
+
+	if not selected_reports:
+		flash('Veuillez sélectionner au moins un rapport', 'error')
+		return redirect(url_for('show_health_data', id=patient_id))
+
+	user: User = get_user_by_id(session['login_id'])
+	# Fetch the selected reports
+	reports = HealthData.query.filter(HealthData.id.in_(selected_reports)).all()
+	if send_email(subject=f'Rapports de santé - {patient.first_name} {patient.last_name}',
+			   body=render_template('email/health_report.html', patient=patient, reports=reports),
+			   sender_email=user.email,
+			   recipient_email=patient.email,
+			   bcc_recipients=[],
+			   smtp_server=app.config['SMTP_SERVER'],
+			   smtp_port=app.config['SMTP_PORT'],
+			   username=app.config['GMAIL_USER'],
+			   password=app.config['GMAIL_APP_PWD'],
+			   author=app.config['GMAIL_FULLNAME']):
+
+		flash('Rapports envoyés avec succès', 'success')
+	else:
+		flash(f'Erreur lors de l\'envoi des rapports: {str(e)}', 'error')
+
+	return redirect(url_for('show_health_data', id=patient.id))
 
 
 @app.before_request

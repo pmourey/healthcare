@@ -1,4 +1,4 @@
-<!-- healthcare/templates/patients.html -->
+<!-- healthcare/templates/patient_health_data.html -->
 
 {% extends 'base.html' %}
 {% include './partials/_menu.html' %}
@@ -7,32 +7,45 @@
 <main>
     {% if patient.health_data %}
     <h2>Données de santé - {{ patient.first_name }} {{ patient.last_name }}</h2>
-    <table class="jobs">
-        <thead>
-        <tr>
-            <th>Date visite</th>
-            <th>Poids</th>
-            <th>Taille</th>
-            <th>Pulsation cardiaque</th>
-            <th>Pression artérielle</th>
-            <th>Température</th>
-            <th>Infos diverses</th>
-        </tr>
-        </thead>
-        {% for data in patient.health_data %}
-        <div id="job">
-            <tr>
-                <td>{{ data.creation_date.strftime('%A %d %B %Y') }}</td>
-                <td>{{ data.weight }}</td>
-                <td>{{ data.height }}</td>
-                <td>{{ data.heart_rate }}</td>
-                <td>{{ data.blood_pressure }}</td>
-                <td>{{ data.temperature }}</td>
-                <td>{{ data.notes }}</td>
-            </tr>
+    <form method="POST" action="{{ url_for('send_health_reports', patient_id=patient.id) }}">
+        <div class="form-actions">
+            <button type="submit" class="btn-send-selected">Envoyer la sélection par email</button>
         </div>
-        {%endfor %}
-    </table>
+        <table class="jobs">
+            <thead>
+            <tr>
+                <th>Sélectionner</th>
+                <th>Date visite</th>
+                <th>Poids</th>
+                <th>Taille</th>
+                <th>Pulsation cardiaque</th>
+                <th>Pression artérielle</th>
+                <th>Température</th>
+                <th>Infos diverses</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for data in patient.health_data %}
+                <tr>
+                    <td>
+                        <input type="checkbox"
+                               name="selected_reports"
+                               value="{{ data.id }}"
+                               id="report-{{ data.id }}"
+                               aria-label="Sélectionner le rapport du {{ data.creation_date.strftime('%d/%m/%Y') }}">
+                    </td>
+                    <td>{{ data.creation_date.strftime('%A %d %B %Y à %Hh%M') }}</td>
+                    <td>{{ data.weight }}</td>
+                    <td>{{ data.height }}</td>
+                    <td>{{ data.heart_rate }}</td>
+                    <td>{{ data.blood_pressure }}</td>
+                    <td>{{ data.temperature }}</td>
+                    <td>{{ data.notes }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </form>
     {% else %}
     <p style="font-size: 16px; text-align: center;">Aucune donnée de santé connue pour {{ patient.firstname }} {{ patient.lastname }} ✌️</p>
     {% endif %}
