@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        table {
+            width: 50%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <h2>Rapport de santé - {{ patient.first_name }} {{ patient.last_name }}</h2>
+    {% for report in reports %}
+    <h3>Visite du {{ report.creation_date.strftime('%A %d %B %Y à %Hh%M') }}</h3>
+    <table>
+        <tr>
+            <th>Poids</th>
+            <td>{{ report.weight }}</td>
+        </tr>
+        <tr>
+            <th>Taille</th>
+            <td>{{ report.height }}</td>
+        </tr>
+        <tr>
+            <th>Pulsation cardiaque</th>
+            <td>{{ report.heart_rate }}</td>
+        </tr>
+        <tr>
+            <th>Pression artérielle</th>
+            <td>{{ report.blood_pressure }}</td>
+        </tr>
+        <tr>
+            <th>Température</th>
+            <td>{{ report.temperature }}</td>
+        </tr>
+        <tr>
+            <th>Notes</th>
+            <td>{{ report.notes }}</td>
+        </tr>
+    </table>
+    {% endfor %}
+</body>
+</html>
