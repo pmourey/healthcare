@@ -44,6 +44,7 @@ class Patient(db.Model):
 	email = db.Column(db.String(120), nullable=False)
 	phone = db.Column(db.String(20), nullable=False)
 	creation_date = db.Column(db.DateTime, nullable=False)
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 	health_data = relationship('HealthData', backref='patient', cascade='all, delete-orphan')
 
@@ -58,6 +59,8 @@ class User(db.Model):
 	recovery_token = db.Column(db.String(128))
 	token_expiration = db.Column(db.DateTime)
 	validated = db.Column(db.Boolean, default=False)
+
+	patients = db.relationship('Patient', backref='user', lazy='dynamic', cascade='all, delete-orphan')
 
 	def __repr__(self):
 		return f'{self.username}:{self.password} ({Role(self.role)})'

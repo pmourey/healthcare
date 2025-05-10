@@ -347,6 +347,7 @@ def show_sessions():
 
 
 @app.route('/new_patient/', methods=['GET', 'POST'])
+@is_connected
 def new_patient():
 	app.logger.debug(f'request.method: {request.method}')
 	if request.method == 'POST':
@@ -362,11 +363,15 @@ def new_patient():
 			if patient:
 				flash(f'Patient {first_name} {last_name} already exists!', 'error')
 			else:
-				patient = Patient(first_name=first_name.capitalize(), last_name=last_name.capitalize(), email=email, phone=phone, creation_date=datetime.now())
+				# patient = Patient(first_name=first_name.capitalize(), last_name=last_name.capitalize(), email=email, phone=phone, creation_date=datetime.now())
+				user = get_user_by_id(session['login_id'])
+				patient = Patient(first_name=first_name.capitalize(), last_name=last_name.capitalize(), email=email, phone=phone, creation_date=datetime.now(), user_id=user.id)
 				# logging.warning("See this message in Flask Debug Toolbar!")
 				db.session.add(patient)
 				db.session.commit()
 				flash('Record was successfully added')
+				return redirect(url_for('new_patient'))
+
 	return render_template('new_patient.html')
 
 
@@ -404,9 +409,11 @@ def show_health_data(id: int):
 @app.route('/show_patients')
 @is_connected
 def show_patients():
-	patients = Patient.query.order_by(desc(Patient.id)).all()
+	user = get_user_by_id(session['login_id'])
+	patients = Patient.query.filter_by(user_id=user.id).order_by(desc(Patient.id)).all()
+	# patients = Patient.query.order_by(desc(Patient.id)).all()
 	app.logger.debug(f'patients: {patients}')
-	return render_template('patients.html', patients=patients, user=get_user_by_id(session['login_id']))
+	return render_template('patients.html', patients=patients, user=user)
 
 
 
