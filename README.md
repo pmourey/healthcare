@@ -5,4 +5,6 @@
 
 https://healthcare06.pythonanywhere.com/
 
+![Modèle de données](healthcare.png)
+
 https://help.pythonanywhere.com/pages/VirtualEnvForWebsites
