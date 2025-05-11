@@ -15,28 +15,29 @@ from tools.send_emails import send_email
 
 
 def get_user_by_id(user_id: int) -> User:
-    # Effectue la requête pour récupérer un utilisateur par nom d'utilisateur et mot de passe
-    return User.query.filter_by(id=user_id).first()
+	# Effectue la requête pour récupérer un utilisateur par nom d'utilisateur et mot de passe
+	return User.query.filter_by(id=user_id).first()
 
 
 def get_session_by_login(username: str) -> Session:
-    # Récupère la session la plus récente
-    user: User = User.query.filter_by(username=username).first()
-    return Session.query.filter_by(login_id=user.id).order_by(Session.start.desc()).first()
+	# Récupère la session la plus récente
+	user: User = User.query.filter_by(username=username).first()
+	return Session.query.filter_by(login_id=user.id).order_by(Session.start.desc()).first()
 
 
 """ Utilities """
 
 
 def check(regex: str, email: str) -> Match[str] | None:
-    return re.fullmatch(regex, email)
+	return re.fullmatch(regex, email)
 
 
 """ Back-end features """
 
+
 def send_confirmation_email(app, confirm_link: str, user: User, author: str) -> bool:
-    subject: str = f"Confirmation de l'inscription ({app.config['NAME']})"
-    body = f'''Bonjour {user.username},<br>
+	subject: str = f"Confirmation de l'inscription ({app.config['NAME']})"
+	body = f'''Bonjour {user.username},<br>
     <br>Une demande de création de compte a été effectuée sur l'application "{app.config['NAME']}"</br>
     <br>
     <br>Veuillez clicker <a href={confirm_link}>ICI</a> pour confirmer votre inscription, svp.<br>
@@ -46,21 +47,12 @@ def send_confirmation_email(app, confirm_link: str, user: User, author: str) -> 
     <br>
     Cordialement,<br>
     {author}.<br><br>'''
-    return send_email(subject=subject,
-                  body=body,
-                  sender_email=app.config['GMAIL_USER'],
-                  recipient_email=f'"{user.username}"<{user.email}>',
-                  bcc_recipients=[app.config['GMAIL_USER']],
-                  smtp_server=app.config['SMTP_SERVER'],
-                  smtp_port=app.config['SMTP_PORT'],
-                  username=app.config['GMAIL_USER'],
-                  password=app.config['GMAIL_APP_PWD'],
-                  author=app.config['GMAIL_FULLNAME'],
-                  )
+	return send_email(subject=subject, body=body, sender_email=app.config['GMAIL_USER'], recipient_email=f'"{user.username}"<{user.email}>', bcc_recipients=[app.config['GMAIL_USER']], smtp_server=app.config['SMTP_SERVER'], smtp_port=app.config['SMTP_PORT'], username=app.config['GMAIL_USER'], password=app.config['GMAIL_APP_PWD'], author=app.config['GMAIL_FULLNAME'], )
+
 
 def send_password_recovery_email(app, reset_link: str, user: User, author: str) -> bool:
-    subject: str = f'Demande de réinitialisation de mot de passe ({app.config['NAME']})'
-    body = f'''Bonjour {user.username},<br>
+	subject: str = f'Demande de réinitialisation de mot de passe ({app.config['NAME']})'
+	body = f'''Bonjour {user.username},<br>
     <br>Vous êtes utilisateur de l'application Flask "{app.config['NAME']}", et une demande de réinitialisation de mot de passe a été effectuée</br>
     <br>Veuillez clicker sur le lien ci-dessous pour lancer le formulaire de réinitialisation.<br>
     <br>{reset_link}<br>
@@ -69,73 +61,65 @@ def send_password_recovery_email(app, reset_link: str, user: User, author: str) 
     <br>
     Cordialement,<br>
     {author}.<br>'''
-    return send_email(subject=subject,
-                  body=body,
-                  sender_email=app.config['GMAIL_USER'],
-                  recipient_email=f'"{user.username}"<{user.email}>',
-                  bcc_recipients=[],
-                  smtp_server=app.config['SMTP_SERVER'],
-                  smtp_port=app.config['SMTP_PORT'],
-                  username=app.config['GMAIL_USER'],
-                  password=app.config['GMAIL_APP_PWD'],
-                  author=app.config['GMAIL_FULLNAME'],
-                  )
+	return send_email(subject=subject, body=body, sender_email=app.config['GMAIL_USER'], recipient_email=f'"{user.username}"<{user.email}>', bcc_recipients=[], smtp_server=app.config['SMTP_SERVER'], smtp_port=app.config['SMTP_PORT'], username=app.config['GMAIL_USER'], password=app.config['GMAIL_APP_PWD'], author=app.config['GMAIL_FULLNAME'], )
 
 
-def send_fake_email(app, job: Job, author: str, cv_resume: str) -> bool:
-    if job.name == 'Prise de contact':
-        subject: str = f'Relance suite prise de contact'
-        content: str = f'''Nous avons échangé le {job.applicationDate.strftime('%d %B %Y')} concernant des offres d'emploi auprès de votre société pouvant correspondre à mon profil.<br>
-<br>
-Je me permets de vous relancer mensuellement pour connaître le statut d'avancement de ma candidature auprès de votre société.<br>
-'''
-    else:
-        subject: str = f'Relance candidature {job.name}'
-        content: str = f'''J'ai postulé le <mark>{job.applicationDate.strftime('%d %B %Y')}</mark> à l'offre \"{job.name}\" au sein de votre société.<br><br>
-Je me permets de vous demander si ce poste est toujours vacant et si dans le cas contraire, vous auriez actuellement des missions en adéquation avec mon profil.<br>
-'''
+""" Password policy check """
 
-    body = f'''Bonjour {job.first_name},<br>
-<br>{content}<br>
-En vous remerciant pour votre retour.<br>
-<br>
-Cordialement,<br>
-{author}.<br>
-{cv_resume}.<br>
-(mail généré par automate <a href=https://pypi.org/project/Flask-APScheduler/>Flask-APScheduler</a>)'''
-
-    # if send_email_old(to=job.email, subject=f'Relance candidature {job.name}', body=body):
-    if send_email(subject=subject,
-                  body=body,
-                  sender_email=app.config['GMAIL_USER'],
-                  recipient_email=f'"{job.first_name}"<{job.email}>',
-                  bcc_recipients=[app.config['GMAIL_USER']],
-                  smtp_server=app.config['SMTP_SERVER'],
-                  smtp_port=app.config['SMTP_PORT'],
-                  username=app.config['GMAIL_USER'],
-                  password=app.config['GMAIL_APP_PWD'],
-                  author=app.config['GMAIL_FULLNAME'],
-                  ):
-        job.relaunchDate = datetime.now(app.config.paris)
-        db.session.commit()
-        return True
-    return False
+import re
+from datetime import datetime
 
 
-def send_reminders(app):
-    with app.app_context():
-        # date: str = datetime.now().strftime("%A, %d. %B %Y %I:%M:%S %p")
-        jobs = Job.query.filter(Job.active).all() if app.config['ALL_CONTACTS'] else Job.query.filter(
-            (Job.active) & (Job.contact == 'Fifi')).all()
-        for job in jobs:
-            if not job.refusalDate and job.email:
-                app.logger.debug(job.first_name)
-                # Calculate the difference between the two dates
-                if job.relaunchDate:
-                    difference = relativedelta(datetime.now(), job.relaunchDate)
-                else:
-                    difference = relativedelta(datetime.now(), job.applicationDate)
-                # app.logger.debug(f'months = {difference.months} - days = {difference.days}')
-                if difference.months >= 1:  # and difference.years == 0 and difference.days == 0:
-                    if send_fake_email(job=job, author=app.config['GMAIL_FULLNAME'], cv_resume=app.config['CV_RESUME']):
-                        app.logger.debug(f'Message sent to {job.email}.')
+def validate_password_complexity(password):
+	"""
+    Validates password against security requirements for healthcare systems.
+    Returns (bool, str) tuple - (is_valid, error_message)
+    """
+	if len(password) < 10:
+		return False, "Password must be at least 10 characters long"
+
+	# Check for at least one uppercase letter
+	if not re.search(r'[A-Z]', password):
+		return False, "Password must contain at least one uppercase letter"
+
+	# Check for at least one lowercase letter
+	if not re.search(r'[a-z]', password):
+		return False, "Password must contain at least one lowercase letter"
+
+	# Check for at least one number
+	if not re.search(r'\d', password):
+		return False, "Password must contain at least one number"
+
+	# Check for at least one special character
+	if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+		return False, "Password must contain at least one special character"
+
+	# Check for common patterns to avoid
+	common_patterns = ['password', '123456', 'qwerty', 'admin']
+	if any(pattern in password.lower() for pattern in common_patterns):
+		return False, "Password contains common patterns that are not allowed"
+
+	# Check for repeating characters (more than 2 times)
+	if re.search(r'(.)\1{2,}', password):
+		return False, "Password cannot contain characters repeating more than twice"
+
+	return True, "Password meets security requirements"
+
+
+def create_user(username, password, email):
+	try:
+		# Validate password complexity
+		is_valid, error_message = validate_password_complexity(password)
+		if not is_valid:
+			raise ValueError(error_message)
+
+		# If validation passes, create the user
+		# It's recommended to hash the password before storing
+		hashed_password = generate_password_hash(password)
+
+		user = User(username=username, password=hashed_password, creation_date=datetime.now(), email=email)
+
+		return user
+
+	except ValueError as e:
+		raise ValueError(f"Password validation failed: {str(e)}")

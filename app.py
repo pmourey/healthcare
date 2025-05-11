@@ -12,7 +12,7 @@ from pytz import timezone
 from sqlalchemy import desc
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from Controller import get_user_by_id, check, send_confirmation_email, send_password_recovery_email, get_session_by_login
+from Controller import get_user_by_id, check, send_confirmation_email, send_password_recovery_email, get_session_by_login, create_user, validate_password_complexity
 from Model import User, db, Session, Patient, HealthData
 
 import secrets
@@ -96,12 +96,14 @@ def register():
 	# Logique d'enregistrement ici
 	error = None
 	if request.method == 'POST':
-		if request.form['confirm_password'] != request.form['password']:
+		username: str = request.form['username']
+		email: str = request.form['email']
+		password: str = request.form['password']
+		confirm_password: str = request.form['confirm_password']
+		if confirm_password != password:
 			# flash('Incorrect login credentials.', 'error')
 			error = 'Password does not match! Please try again.'
 		else:
-			username: str = request.form['username']
-			email: str = request.form['email']
 			existing_user: User = User.query.filter_by(username=username).first()
 			existing_email: User = User.query.filter_by(email=email).first()
 			if existing_user:
@@ -111,29 +113,33 @@ def register():
 			elif not check(app.config['REGEX'], email):
 				error = f'email {email} is invalid! Please check syntax.'
 			else:
-				user = User(username=username, password=request.form['password'], creation_date=datetime.now(), email=email)
-				# logging.warning("See this message in Flask Debug Toolbar!")
-				db.session.add(user)
-				db.session.commit()
-				s = Serializer(app.config['SECRET_KEY'])
-				# s = URLSafeSerializer('SECRET_KEY')
-				token = s.dumps({'user_id': user.id})
+				try:
+					user = create_user(username, password, email)  # Add code to save user to database
+					# user = User(username=username, password=password, creation_date=datetime.now(), email=email)
+					# logging.warning("See this message in Flask Debug Toolbar!")
+					db.session.add(user)
+					db.session.commit()
+					s = Serializer(app.config['SECRET_KEY'])
+					# s = URLSafeSerializer('SECRET_KEY')
+					token = s.dumps({'user_id': user.id})
 
-				# Mettez à jour le modèle d'utilisateur avec le jeton et le délai d'expiration
-				# user.recovery_token = generate_password_hash(token, method='sha256')
-				user.recovery_token = generate_password_hash(token)
-				user.token_expiration = datetime.now() + timedelta(minutes=10)
-				# app.logger.debug(f'time zone info: {user.token_expiration.tzinfo}')
+					# Mettez à jour le modèle d'utilisateur avec le jeton et le délai d'expiration
+					# user.recovery_token = generate_password_hash(token, method='sha256')
+					user.recovery_token = generate_password_hash(token)
+					user.token_expiration = datetime.now() + timedelta(minutes=10)
+					# app.logger.debug(f'time zone info: {user.token_expiration.tzinfo}')
 
-				db.session.commit()
+					db.session.commit()
 
-				# Envoyer un e-mail de confirmation d'inscription
+					# Envoyer un e-mail de confirmation d'inscription
 
-				flash('Un e-mail de demande de confirmation d\'inscription a été envoyé!', 'success')
-				confirm_link = url_for('validate_email', token=token, _external=True)
-				send_confirmation_email(app=app, confirm_link=confirm_link, user=user, author=app.config['GMAIL_FULLNAME'])
-				return redirect(url_for('register'))
-
+					flash('Un e-mail de demande de confirmation d\'inscription a été envoyé!', 'success')
+					confirm_link = url_for('validate_email', token=token, _external=True)
+					send_confirmation_email(app=app, confirm_link=confirm_link, user=user, author=app.config['GMAIL_FULLNAME'])
+					return redirect(url_for('register'))
+				except ValueError as e:
+					# Handle the error appropriately (e.g., return to form with error message)
+					error = str(e)
 	return render_template('register.html', error=error)
 
 
@@ -175,11 +181,18 @@ def change_password():
 		confirm_new_password: str = request.form["confirm_new_password"]
 		app.logger.debug(f'user (change pwd) = {user.username} - new pwd = {new_password} - confirm_new_pwd = {confirm_new_password}')
 		if new_password == confirm_new_password:
-			user.password = generate_password_hash(new_password, method='sha256')
-			db.session.add(user)
-			db.session.commit()
-			flash('Password was successfully changed!')
-			return redirect(url_for('welcome'))
+			try:
+				is_valid, error_message = validate_password_complexity(new_password)
+				if not is_valid:
+					raise ValueError(error_message)
+				user.password = generate_password_hash(new_password, method='sha256')
+				db.session.add(user)
+				db.session.commit()
+				flash('Password was successfully changed!')
+				return redirect(url_for('welcome'))
+			except ValueError as e:
+				# Handle the error appropriately (e.g., return to form with error message)
+				error = str(e)
 		else:
 			error = 'Passwords does not match! Please try again.'
 	return render_template('reset_password.html', error=error)
@@ -273,23 +286,29 @@ def reset_password(token):
 	app.logger.debug(f'reset password user {user.username} - data = {data} \n - token = {token}')
 
 	if request.method == 'POST':
-
 		new_password = request.form.get('new_password')
 		confirm_new_password = request.form.get('confirm_new_password')
 
 		if new_password == confirm_new_password:
-			# Mettre à jour le mot de passe de l'utilisateur
-			# user.password = generate_password_hash(new_password, method='sha256')
-			user.password = generate_password_hash(new_password)
+			try:
+				is_valid, error_message = validate_password_complexity(new_password)
+				if not is_valid:
+					raise ValueError(error_message)
+				# Mettre à jour le mot de passe de l'utilisateur
+				# user.password = generate_password_hash(new_password, method='sha256')
+				user.password = generate_password_hash(new_password)
 
-			# Réinitialiser le champ de récupération de mot de passe
-			user.recovery_token = None
-			user.token_expiration = None
+				# Réinitialiser le champ de récupération de mot de passe
+				user.recovery_token = None
+				user.token_expiration = None
 
-			db.session.commit()
+				db.session.commit()
 
-			flash('Le mot de passe a été réinitialisé avec succès.', 'success')
-			return redirect(url_for('login'))
+				flash('Le mot de passe a été réinitialisé avec succès.', 'success')
+				return redirect(url_for('login'))
+			except ValueError as e:
+				# Handle the error appropriately (e.g., return to form with error message)
+				error = str(e)
 		else:
 			error = 'Les mots de passe ne correspondent pas.'
 
