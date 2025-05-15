@@ -26,7 +26,10 @@
     [x] Fiche saisie nouvelle visite patient
     [ ] Fiche de mise à jour visite patient
 
+### Administration du site (Rôle Admin):
 
+    [x] Historique des sessions utilisateur (heure début, heure fin, adresse IP, logiciel client)
+    [x] Gestion des utilisateurs inscrits dans l'application (modification rôle ou suppression)
 
 
 https://healthcare06.pythonanywhere.com/
