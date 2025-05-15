@@ -78,7 +78,7 @@ def get_client_ip():
 		client_ip = request.remote_addr
 	return client_ip
 
-
+@csrf.exempt
 @app.route('/')
 def welcome():
 	user = None
@@ -102,7 +102,7 @@ def welcome():
 		app.logger.debug(f"Client IP: {client_ip}, Browser: ({browser_info})")
 	return render_template('index.html', session=session, user=user, token=token)
 
-
+@csrf.exempt
 @app.route("/register", methods=['GET', 'POST'])
 def register():
 	# Logique d'enregistrement ici
@@ -154,7 +154,7 @@ def register():
 					error = str(e)
 	return render_template('register.html', error=error)
 
-
+@csrf.exempt
 @app.route("/login", methods=['GET', 'POST'])
 def login():
 	# Logique de connexion ici
@@ -182,7 +182,7 @@ def login():
 			return render_template('login.html', error=error)
 	return render_template('login.html', error=error)
 
-
+@csrf.exempt
 @app.route("/change_password", methods=['GET', 'POST'])
 @is_connected
 def change_password():
@@ -209,7 +209,7 @@ def change_password():
 			error = 'Passwords does not match! Please try again.'
 	return render_template('reset_password.html', error=error)
 
-
+@csrf.exempt
 @app.route('/request_reset_password', methods=['GET', 'POST'])
 def request_reset_password():
 	if request.method == 'POST':
@@ -238,7 +238,6 @@ def request_reset_password():
 		flash('Aucun utilisateur trouvé avec cet e-mail.', 'error')
 
 	return render_template('request_reset_password.html')
-
 
 @app.route('/validate_email/<token>', methods=['GET', 'POST'])
 def validate_email(token):
@@ -276,7 +275,7 @@ def validate_email(token):
 	flash('Votre compte a été confirmé avec succès.', 'success')
 	return redirect(url_for('login'))
 
-
+@csrf.exempt
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
 	error: str = None
@@ -376,7 +375,7 @@ def show_sessions():
 	sessions = Session.query.filter(Session.end.is_(None)).order_by(desc(Session.id)).all()
 	return render_template('sessions.html', sessions=sessions)
 
-
+@csrf.exempt
 @app.route('/new_patient/', methods=['GET', 'POST'])
 @is_connected
 def new_patient():
@@ -405,7 +404,7 @@ def new_patient():
 
 	return render_template('new_patient.html')
 
-
+@csrf.exempt
 @app.route('/new_health_data/<int:id>', methods=['GET', 'POST'])
 @is_connected
 def new_health_data(id: int):
@@ -564,5 +563,5 @@ def format_paris_time(utc_dt):
 	return paris_time.strftime('%A %d %B %Y à %Hh%M')
 
 
-if __name__ == '__main__':
-	app.run()
+# if __name__ == '__main__':
+# 	app.run()
