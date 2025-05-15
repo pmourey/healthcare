@@ -5,7 +5,7 @@
 <main>
     <!-- Votre contenu de page ici -->
     {% if 'login_id' in session %}
-        <p>Bienvenue, {{user.username}}!</p>
+        <p>Bienvenue, Docteur {{user.username}}!</p>
         <table class="welcome">
             <tr>
                 <td><a href="{{ url_for('new_patient') }}">Nouveau patient</a></td>
