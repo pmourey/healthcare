@@ -336,7 +336,7 @@ def logout():
 		db.session.commit()
 	logout_user()
 	# remove the username from the session if it's there
-	session.pop('id', None)
+	session.pop('login_id', None)
 	flash('You have been logged out.', 'success')
 	return redirect(url_for('login'))
 
@@ -563,5 +563,5 @@ def format_paris_time(utc_dt):
 	return paris_time.strftime('%A %d %B %Y à %Hh%M')
 
 
-# if __name__ == '__main__':
-# 	app.run()
+if __name__ == '__main__':
+	app.run()
