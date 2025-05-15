@@ -12,7 +12,8 @@
             <input type=number placeholder="Poids" name="weight" value="{{ request.form.weight }}">
             <input type=number placeholder="Taille" name="height" value="{{ request.form.height }}">
             <input type=number placeholder="Pulsation cardiaque" name="heart_rate" value="{{ request.form.heart_rate }}">
-            <input type=number placeholder="Pression artérielle" name="blood_pressure" value="{{ request.form.blood_pressure }}">
+            <input type=number placeholder="Pression artérielle (Sys)" name="blood_pressure_sys" value="{{ request.form.blood_pressure_sys }}">
+            <input type=number placeholder="Pression artérielle (Dia)" name="blood_pressure_dia" value="{{ request.form.blood_pressure_dia }}">
             <input type=number placeholder="Température" name="temperature" value="{{ request.form.temperature }}">
             <textarea name="notes" placeholder="Notes" rows="4" class="full-width-textarea">{{ request.form.notes }}</textarea>
             <input type="submit" value="Create">

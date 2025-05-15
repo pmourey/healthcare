@@ -200,3 +200,27 @@ th {
     border-radius: 4px;
     cursor: pointer;
 }
+
+# Chart report
+
+ .report-container {
+        max-width: 1200px;
+        margin: 20px auto;
+        padding: 20px;
+    }
+
+.patient-info {
+    margin-bottom: 30px;
+    padding: 15px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+}
+.chart-container {
+    margin: 20px 0;
+    height: 400px;
+}
+@media print {
+    .no-print {
+        display: none;
+    }
+}

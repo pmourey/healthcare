@@ -6,7 +6,16 @@ This script provides CRUD features inside a Flask application to offer a tool fo
 """
 from __future__ import annotations
 
-from flask import Flask, request, flash, url_for, redirect, render_template, session, send_file
+import base64
+import os
+import re
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+from flask import Flask, request, flash, url_for, redirect, render_template, session, send_file, jsonify
+from flask_wtf.csrf import CSRFProtect  # Import correct pour CSRFProtect
+
 from flask_login import LoginManager, logout_user
 from pytz import timezone
 from sqlalchemy import desc
@@ -27,6 +36,7 @@ from datetime import datetime, timedelta
 from decorators import is_connected, is_admin
 from tools.send_emails import send_email
 
+
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 # Set the secret key
 app.secret_key = secrets.token_bytes(32).hex()
@@ -44,6 +54,8 @@ basicConfig(level=DEBUG)
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+
+csrf = CSRFProtect(app)
 
 
 # Add the filter to the Jinja environment
@@ -404,13 +416,14 @@ def new_health_data(id: int):
 		weight = request.form['weight']
 		height = request.form['height']
 		heart_rate = request.form['heart_rate']
-		blood_pressure = request.form['blood_pressure']
+		blood_pressure_sys = int(request.form['blood_pressure_sys'])
+		blood_pressure_dia = int(request.form['blood_pressure_dia'])
 		temperature = request.form['temperature']
 		notes = request.form['notes']
-		if not (weight and height and heart_rate and blood_pressure and temperature):
+		if not (weight and height and heart_rate and blood_pressure_sys and blood_pressure_dia and temperature):
 			flash('Please enter all the fields', 'error')
 		else:
-			health_data = HealthData(weight=weight, height=height, heart_rate=heart_rate, blood_pressure=blood_pressure, temperature=temperature, notes=notes, creation_date=datetime.now(), patient_id=id)
+			health_data = HealthData(weight=weight, height=height, heart_rate=heart_rate, blood_pressure_sys=blood_pressure_sys, blood_pressure_dia=blood_pressure_dia, temperature=temperature, notes=notes, creation_date=datetime.now(), patient_id=id)
 			# logging.warning("See this message in Flask Debug Toolbar!")
 			db.session.add(health_data)
 			db.session.commit()
@@ -435,7 +448,7 @@ def show_patients():
 	return render_template('patients.html', patients=patients, user=user)
 
 
-
+@csrf.exempt
 @app.route('/patient/<int:patient_id>/send-reports', methods=['POST'])
 @is_connected
 def send_health_reports(patient_id):
@@ -465,6 +478,78 @@ def send_health_reports(patient_id):
 		flash(f'Erreur lors de l\'envoi des rapports: {str(e)}', 'error')
 
 	return redirect(url_for('show_health_data', id=patient.id))
+
+
+
+@app.route('/patient/report/<int:id>')
+@is_connected
+def patient_report(id):
+	patient = Patient.query.get_or_404(id)
+	health_data = HealthData.query.filter_by(patient_id=id).order_by(HealthData.creation_date).all()
+
+	dates = [data.creation_date.strftime('%d/%m/%Y') for data in health_data]
+	weights = [data.weight for data in health_data]
+	blood_pressure_sys = [data.blood_pressure_sys for data in health_data]
+	blood_pressure_dia = [data.blood_pressure_dia for data in health_data]
+
+	return render_template('patient_report.html', patient=patient, today=datetime.now(), dates=dates, weights=weights, blood_pressure_sys=blood_pressure_sys, blood_pressure_dia=blood_pressure_dia)
+
+
+@csrf.exempt
+@app.route('/send_report_email', methods=['POST'])
+@is_connected
+def send_report_email():
+	try:
+		data = request.json
+		email = data['email']
+		first_name = data['firstName']
+		last_name = data['lastName']
+		chart_image = data['chartImage']
+
+		# Extraire les données de l'image
+		image_data = re.sub('^data:image/.+;base64,', '', chart_image)
+		image_bytes = base64.b64decode(image_data)
+
+		# Créer le message multipart
+		msg = MIMEMultipart('related')
+
+		# Corps HTML
+		html_content = f"""
+        <html>
+        <body>
+            <h2>Rapport médical</h2>
+            <p>Bonjour {first_name} {last_name},</p>
+            <p>Veuillez trouver ci-joint votre rapport médical avec le graphique de votre évolution.</p>
+            <p>Voici votre graphique d'évolution :</p>
+            <img src="cid:chart_image" alt="Graphique d'évolution" style="max-width: 100%;">
+            <br>
+            <p>Cordialement,<br>
+            Votre équipe médicale</p>
+        </body>
+        </html>
+        """
+
+		# Ajouter le corps HTML
+		msg_html = MIMEText(html_content, 'html')
+		msg.attach(msg_html)
+
+		# Ajouter l'image
+		img = MIMEImage(image_bytes)
+		img.add_header('Content-ID', '<chart_image>')
+		img.add_header('Content-Disposition', 'inline', filename='evolution_medicale.png')
+		msg.attach(img)
+
+		# Envoyer l'email
+		success = send_email(subject=f'Rapport médical - {first_name} {last_name}', body=msg,  # Passer directement l'objet MIMEMultipart
+			sender_email=app.config['GMAIL_USER'], recipient_email=email, bcc_recipients=[], smtp_server=app.config['SMTP_SERVER'], smtp_port=app.config['SMTP_PORT'], username=app.config['GMAIL_USER'], password=app.config['GMAIL_APP_PWD'], author="Service Médical")
+
+		if success:
+			return jsonify({'success': True})
+		else:
+			return jsonify({'success': False, 'error': 'Échec de l\'envoi de l\'email'})
+
+	except Exception as e:
+		return jsonify({'success': False, 'error': str(e)})
 
 
 @app.before_request

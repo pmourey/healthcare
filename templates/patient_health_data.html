@@ -19,7 +19,7 @@
                 <th>Poids</th>
                 <th>Taille</th>
                 <th>Pulsation cardiaque</th>
-                <th>Pression artérielle</th>
+                <th>Pression artérielle (Sys/Dia)</th>
                 <th>Température</th>
                 <th>Infos diverses</th>
             </tr>
@@ -38,7 +38,7 @@
                     <td>{{ data.weight }}</td>
                     <td>{{ data.height }}</td>
                     <td>{{ data.heart_rate }}</td>
-                    <td>{{ data.blood_pressure }}</td>
+                    <td>{{ data.blood_pressure_sys }}/{{ data.blood_pressure_dia }}</td>
                     <td>{{ data.temperature }}</td>
                     <td>{{ data.notes }}</td>
                 </tr>

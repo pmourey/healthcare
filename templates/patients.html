@@ -12,6 +12,7 @@
         <tr>
             <th>Action</th>
             <th>Action</th>
+            <th>Action</th>
             <th>Prénom</th>
             <th>Nom</th>
             <th>E-Mail</th>
@@ -24,6 +25,7 @@
             <tr>
                 <td><button><a href="{{ url_for('show_health_data', id=patient.id) }}" class="button">Historique visites</a></button></td>
                 <td><button><a href="{{ url_for('new_health_data', id=patient.id) }}" class="button">Nouvelle visite</a></button></td>
+                <td><button><a href="{{ url_for('patient_report', id=patient.id) }}" class="button">Générer rapport</a></button></td>
                 <td>{{ patient.first_name }}</td>
                 <td>{{ patient.last_name }}</td>
                 <td>{{ patient.email }}</td>
