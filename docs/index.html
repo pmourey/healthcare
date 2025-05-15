@@ -5,41 +5,66 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>Healthcare – Suivi patient simple pour médecins non informatisés</title>
-  <meta name="description" content="Healthcare est une application web gratuite et sécurisée permettant aux médecins de suivre les consultations et les données de santé des patients, sans logiciel métier.">
+  <meta name="description" content="Application web gratuite pour aider les médecins à suivre les consultations et données patients. Historique, graphiques, sans logiciel métier.">
 
-  <!-- Balises Open Graph pour les réseaux sociaux -->
   <meta property="og:title" content="Healthcare – Suivi patient pour médecins">
   <meta property="og:description" content="Application web minimaliste pour structurer les données patient. Historique, graphiques, accessible en ligne.">
-  <meta property="og:image" content="../healthcare.png">
-  <meta property="og:url" content="https://healthcare06.pythonanywhere.com">
+  <meta property="og:url" content="https://pmourey.github.io/healthcare">
   <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
 
-  <!-- Balise Twitter (optionnelle) -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Healthcare – Suivi patient pour médecins">
-  <meta name="twitter:description" content="Application web simple et gratuite pour consultations médicales.">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 2rem;
+      background: #f9f9f9;
+      color: #333;
+    }
+    h1 {
+      color: #0066cc;
+    }
+    .button {
+      background-color: #007BFF;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 5px;
+      display: inline-block;
+      margin-top: 1rem;
+    }
+    .qr-code {
+      margin-top: 2rem;
+    }
+    footer {
+      margin-top: 4rem;
+      font-size: 0.9rem;
+      color: #777;
+    }
+  </style>
 </head>
 <body>
 
   <h1>Healthcare – Outil de suivi patient pour médecins sans logiciel métier</h1>
 
-  <p>
-    <strong>Healthcare</strong> est une application web légère, sécurisée et sans abonnement.
-    Elle permet aux professionnels de santé de structurer facilement le suivi de leurs patients
-    : consultations, diagnostics, traitements et visualisation de l'évolution clinique.
-  </p>
-
-  <h2>Fonctionnalités principales</h2>
+  <p><strong>Healthcare</strong> est une application web gratuite, simple et sécurisée permettant aux professionnels de santé de :</p>
   <ul>
-    <li>Authentification sécurisée</li>
-    <li>Fiches patient + historique</li>
-    <li>Graphiques cliniques : poids, tension, température...</li>
-    <li>Utilisable depuis un simple navigateur</li>
+    <li>Gérer des fiches patient</li>
+    <li>Saisir des consultations : diagnostic, traitement, remarques</li>
+    <li>Suivre des données cliniques dans le temps (poids, tension, température...)</li>
+    <li>Visualiser automatiquement des <strong>graphiques d'évolution</strong></li>
   </ul>
 
-  <p>
-    👉 <a href="https://healthcare06.pythonanywhere.com">Accéder à la démo en ligne</a>
-  </p>
+  <a class="button" href="https://healthcare06.pythonanywhere.com" target="_blank">Accéder à la démo en ligne</a>
+
+  <div class="qr-code">
+    <p>📱 Scannez avec votre téléphone :</p>
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://healthcare06.pythonanywhere.com" alt="QR Code vers la démo">
+  </div>
+
+  <footer>
+    Développé avec Flask • Hébergé sur PythonAnywhere • <a href="https://github.com/pmourey/healthcare" target="_blank">Voir le code source</a>
+  </footer>
 
 </body>
 </html>
