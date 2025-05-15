@@ -417,7 +417,7 @@ def new_health_data(id: int):
 		heart_rate = request.form['heart_rate']
 		blood_pressure_sys = int(request.form['blood_pressure_sys'])
 		blood_pressure_dia = int(request.form['blood_pressure_dia'])
-		temperature = request.form['temperature']
+		temperature = float(request.form['temperature'])
 		notes = request.form['notes']
 		if not (weight and height and heart_rate and blood_pressure_sys and blood_pressure_dia and temperature):
 			flash('Please enter all the fields', 'error')
