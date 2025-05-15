@@ -66,9 +66,6 @@ def send_password_recovery_email(app, reset_link: str, user: User, author: str) 
 
 """ Password policy check """
 
-import re
-from datetime import datetime
-
 
 def validate_password_complexity(password):
 	"""
