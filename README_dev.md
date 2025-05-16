@@ -15,16 +15,23 @@
 
     [x] Fiche saisie nouveau patient
     [ ] Fiche de mise à jour patient
-    [x] Consultation de l'historique des visites d'un patient:
+    [x] Consultation de l'historique des visites médicales:
+        [x] Possibilité d'envoyer une sélection par mail au patient
+    [x] Consultation de l'historique des analyses sanguines:
         [x] Possibilité d'envoyer une sélection par mail au patient
     [x] Affichage graphique données de santé d'un patient
         [x] Impression graphique
         [x] Envoi par mail au patient
 
-### Gestion visites:
+### Gestion visites médicales:
 
     [x] Fiche saisie nouvelle visite patient
     [ ] Fiche de mise à jour visite patient
+
+### Gestion analyses sanguines:
+
+    [x] Fiche saisie nouvelle analyse sanguine
+    [ ] Fiche de mise à jour analyse sanguine
 
 ### Administration du site (Rôle Admin):
 
