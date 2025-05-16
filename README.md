@@ -17,6 +17,7 @@
   - Tension artérielle
   - Température
   - Glycémie (ou autre indicateur personnalisé)
+- Saisie des marqueurs principaux (provenant des centres d'analyse)
 - 📂 Historique patient consultable à tout moment
 - 🧭 Interface simple et intuitive, utilisable depuis un navigateur
 
