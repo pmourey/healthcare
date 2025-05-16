@@ -22,7 +22,7 @@ from sqlalchemy import desc
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from Controller import get_user_by_id, check, send_confirmation_email, send_password_recovery_email, get_session_by_login, create_user, validate_password_complexity
-from Model import User, db, Session, Patient, HealthData
+from Model import User, db, Session, Patient, HealthData, AnalyseSanguine
 
 import secrets
 from itsdangerous import URLSafeSerializer, Serializer
@@ -436,6 +436,93 @@ def show_health_data(id: int):
 	patient = Patient.query.get_or_404(id)
 	return render_template('patient_health_data.html', patient=patient)
 
+@csrf.exempt
+@app.route('/new_blood_data_old/<int:id>', methods=['GET', 'POST'])
+@is_connected
+def new_blood_data_old(id: int):
+	# app.logger.debug(f'request.form: {request.form}')
+	patient = Patient.query.get_or_404(id)
+	# app.logger.debug(f'patient: {patient}')
+	if request.method == 'POST':
+		try:
+			date_analyse = request.form.get('date_analyse')
+			app.logger.debug(f'date_analyse: {date_analyse}')
+			date_analyse = datetime.strptime(date_analyse, '%Y-%m-%dT%H:%M') if date_analyse else datetime.now()
+			app.logger.debug(f'date_analyse: {date_analyse}')
+			hemoglobine = float(request.form['hemoglobine'])
+			hematocrite = float(request.form['hematocrite'])
+			globules_blancs = int(request.form['globules_blancs'])
+			globules_rouges = int(request.form['globules_rouges'])
+			plaquettes = int(request.form['plaquettes'])
+			creatinine = float(request.form['creatinine'])
+			uree = int(request.form['uree'])
+			glycemie = float(request.form['glycemie'])
+			cholesterol_total = float(request.form['cholesterol_total'])
+			hdl = float(request.form['hdl'])
+			ldl = float(request.form['ldl'])
+			triglycerides = float(request.form['triglycerides'])
+			tsh = float(request.form['tsh'])
+			psa = float(request.form['psa'])
+			alt = int(request.form['alt'])
+			ast = int(request.form['ast'])
+			fer = float(request.form['fer'])
+			vitamine_d = int(request.form['vitamine_d'])
+			blood_data = AnalyseSanguine(date_analyse=date_analyse, hemoglobine=hemoglobine, hematocrite=hematocrite, globules_blancs=globules_blancs, globules_rouges=globules_rouges, plaquettes=plaquettes, creatinine=creatinine, uree=uree, glycemie=glycemie, cholesterol_total=cholesterol_total, hdl=hdl, ldl=ldl, triglycerides=triglycerides, tsh=tsh, psa=psa, alt=alt, ast=ast, fer=fer, vitamine_d=vitamine_d, patient_id=id)
+			app.logger.debug(f'blood_data: {blood_data}')
+			db.session.add(blood_data)
+			db.session.commit()
+			flash('Record was successfully added')
+		except Exception as e:
+			app.logger.debug(f'error: {e}')
+			flash(f'Error in form: {e}', 'error')
+	return render_template('new_blood_data.html', patient=patient)
+
+
+@csrf.exempt
+@app.route('/new_blood_data/<int:id>', methods=['GET', 'POST'])
+@is_connected
+def new_blood_data(id: int):
+	patient = Patient.query.get_or_404(id)
+
+	if request.method == 'POST':
+		try:
+			# Helper function to safely convert values
+			def safe_float(value, default=None):
+				try:
+					return float(value) if value.strip() else default
+				except (ValueError, AttributeError):
+					return default
+
+			def safe_int(value, default=None):
+				try:
+					return int(value) if value.strip() else default
+				except (ValueError, AttributeError):
+					return default
+
+			# Handle date
+			date_analyse = request.form.get('date_analyse')
+			date_analyse = datetime.strptime(date_analyse, '%Y-%m-%dT%H:%M') if date_analyse else datetime.now()
+
+			# Create blood data object with safe conversions
+			blood_data = AnalyseSanguine(date_analyse=date_analyse, hemoglobine=safe_float(request.form.get('hemoglobine')), hematocrite=safe_float(request.form.get('hematocrite')), globules_blancs=safe_int(request.form.get('globules_blancs')), globules_rouges=safe_int(request.form.get('globules_rouges')), plaquettes=safe_int(request.form.get('plaquettes')), creatinine=safe_float(request.form.get('creatinine')), uree=safe_int(request.form.get('uree')), glycemie=safe_float(request.form.get('glycemie')), cholesterol_total=safe_float(request.form.get('cholesterol_total')), hdl=safe_float(request.form.get('hdl')), ldl=safe_float(request.form.get('ldl')), triglycerides=safe_float(request.form.get('triglycerides')), tsh=safe_float(request.form.get('tsh')), psa=safe_float(request.form.get('psa')), alt=safe_int(request.form.get('alt')), ast=safe_int(request.form.get('ast')), fer=safe_float(request.form.get('fer')), vitamine_d=safe_int(request.form.get('vitamine_d')), patient_id=id)
+
+			app.logger.debug(f'blood_data: {blood_data}')
+			db.session.add(blood_data)
+			db.session.commit()
+			flash('Record was successfully added')
+
+		except Exception as e:
+			app.logger.error(f'Error: {str(e)}', exc_info=True)
+			flash(f'Error in form: {str(e)}', 'error')
+			return render_template('new_blood_data.html', patient=patient), 400
+
+	return render_template('new_blood_data.html', patient=patient)
+
+@app.route('/show_blood_data/<int:id>')
+@is_connected
+def show_blood_data(id: int):
+	patient = Patient.query.get_or_404(id)
+	return render_template('patient_blood_data.html', patient=patient)
 
 @app.route('/show_patients')
 @is_connected
@@ -448,7 +535,8 @@ def show_patients():
 
 
 @csrf.exempt
-@app.route('/patient/<int:patient_id>/send-reports', methods=['POST'])
+# @app.route('/patient/<int:patient_id>/send-reports', methods=['POST'])
+@app.route('/send_health_reports/<int:patient_id>', methods=['POST'])
 @is_connected
 def send_health_reports(patient_id):
 	selected_reports = request.form.getlist('selected_reports')
@@ -474,10 +562,41 @@ def send_health_reports(patient_id):
 
 		flash('Rapports envoyés avec succès', 'success')
 	else:
-		flash(f'Erreur lors de l\'envoi des rapports: {str(e)}', 'error')
+		flash(f'Erreur lors de l\'envoi des rapports', 'error')
 
 	return redirect(url_for('show_health_data', id=patient.id))
 
+
+@csrf.exempt
+@app.route('/send_blood_reports/<int:patient_id>', methods=['POST'])
+@is_connected
+def send_blood_reports(patient_id):
+	selected_reports = request.form.getlist('selected_reports')
+	patient = Patient.query.get_or_404(patient_id)
+
+	if not selected_reports:
+		flash('Veuillez sélectionner au moins un rapport', 'error')
+		return redirect(url_for('show_blood_data', id=patient_id))
+
+	user: User = get_user_by_id(session['login_id'])
+	# Fetch the selected reports
+	reports = AnalyseSanguine.query.filter(AnalyseSanguine.id.in_(selected_reports)).all()
+	if send_email(subject=f'Analyses de sang - {patient.first_name} {patient.last_name}',
+			   body=render_template('email/blood_report.html', patient=patient, reports=reports),
+			   sender_email=user.email,
+			   recipient_email=patient.email,
+			   bcc_recipients=[],
+			   smtp_server=app.config['SMTP_SERVER'],
+			   smtp_port=app.config['SMTP_PORT'],
+			   username=app.config['GMAIL_USER'],
+			   password=app.config['GMAIL_APP_PWD'],
+			   author=app.config['GMAIL_FULLNAME']):
+
+		flash('Rapports envoyés avec succès', 'success')
+	else:
+		flash(f'Erreur lors de l\'envoi des rapports', 'error')
+
+	return redirect(url_for('show_blood_data', id=patient.id))
 
 
 @app.route('/patient/report/<int:id>')

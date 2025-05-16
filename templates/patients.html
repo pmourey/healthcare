@@ -10,9 +10,11 @@
     <table class="jobs">
         <thead>
         <tr>
-            <th>Action</th>
-            <th>Action</th>
-            <th>Action</th>
+            <th>Visites</th>
+            <th>Analyses</th>
+            <th>Nouvelle visite</th>
+            <th>Nouvelle analyse</th>
+            <th>Graphiques</th>
             <th>Prénom</th>
             <th>Nom</th>
             <th>E-Mail</th>
@@ -23,9 +25,11 @@
         {% for patient in patients %}
         <div id="job">
             <tr>
-                <td><button><a href="{{ url_for('show_health_data', id=patient.id) }}" class="button">Historique visites</a></button></td>
-                <td><button><a href="{{ url_for('new_health_data', id=patient.id) }}" class="button">Nouvelle visite</a></button></td>
-                <td><button><a href="{{ url_for('patient_report', id=patient.id) }}" class="button">Générer rapport</a></button></td>
+                <td><button><a href="{{ url_for('show_health_data', id=patient.id) }}" class="button">Consulter</a></button></td>
+                <td><button><a href="{{ url_for('show_blood_data', id=patient.id) }}" class="button">Consulter</a></button></td>
+                <td><button><a href="{{ url_for('new_health_data', id=patient.id) }}" class="button">Créer</a></button></td>
+                <td><button><a href="{{ url_for('new_blood_data', id=patient.id) }}" class="button">Créer</a></button></td>
+                <td><button><a href="{{ url_for('patient_report', id=patient.id) }}" class="button">Consulter</a></button></td>
                 <td>{{ patient.first_name }}</td>
                 <td>{{ patient.last_name }}</td>
                 <td>{{ patient.email }}</td>

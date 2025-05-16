@@ -1,0 +1,37 @@
+<!-- healthcare/templates/new_blood_data.html -->
+
+{% extends 'base.html' %}
+{% include './partials/_menu.html' %}
+
+
+{% block main %}
+<main>
+    <h2>Analyses sanguines - {{ patient.first_name }} {{ patient.last_name }}</h2>
+    <div>
+        <form method="POST" action="{{ url_for('new_blood_data', id=patient.id) }}">
+            <label for="date_analyse">Date d'analyse</label>
+            <input type="datetime-local" name="date_analyse" value="{{ request.form.date_analyse }}">
+            <input type=number step="0.1" placeholder="Hémoglobine (g/dL)" name="hemoglobine" value="{{ request.form.hemoglobine }}">
+            <input type=number step="0.1" placeholder="Hématocrite (%)" name="hematocrite" value="{{ request.form.hematocrite }}">
+            <input type=number placeholder="Leucocytes (/mm3)" name="globules_blancs" value="{{ request.form.globules_blancs }}">
+            <input type=number placeholder="Hématies (/mm3)" name="globules_rouges" value="{{ request.form.globules_rouges }}">
+            <input type=number placeholder="Plaquettes (/mm3)" name="plaquettes" value="{{ request.form.plaquettes }}">
+            <input type=number step="0.1" placeholder="Créatinine (mg/L)" name="creatinine" value="{{ request.form.creatinine }}">
+            <input type=number placeholder="Urée - Acide urique (mg/L)" name="uree" value="{{ request.form.uree }}">
+            <input type=number step="0.01" placeholder="Glycémie (g/L)" name="glycemie" value="{{ request.form.glycemie }}">
+            <input type=number step="0.01" placeholder="Cholestérol Total (g/L)" name="cholesterol_total" value="{{ request.form.cholesterol_total }}">
+            <input type=number step="0.01" placeholder="HDL-Cholestérol (g/L)" name="hdl" value="{{ request.form.hdl }}">
+            <input type=number step="0.01" placeholder="LDL-Cholestérol (g/L)" name="ldl" value="{{ request.form.ldl }}">
+            <input type=number step="0.01" placeholder="Triglycérides (g/L)" name="triglycerides" value="{{ request.form.triglycerides }}">
+            <input type=number step="0.01" placeholder="TSH-Thyroïde (mUI/L)" name="tsh" value="{{ request.form.tsh }}">
+            <input type=number step="0.01" placeholder="PSA (ng/mL)" name="psa" value="{{ request.form.psa }}">
+            <input type=number placeholder="ALT - Transaminase SGPT (UI/L)" name="alt" value="{{ request.form.alt }}">
+            <input type=number placeholder="AST - Transaminase SGOT (UI/L)" name="ast" value="{{ request.form.ast }}">
+            <input type=number step="0.1" placeholder="Fer (µg/dL)" name="fer" value="{{ request.form.fer }}">
+            <input type=number step="0.1" placeholder="Vitamine D (ng/mL)" name="vitamine_d" value="{{ request.form.vitamine_d }}">
+            <input type="submit" value="Valider">
+        </form>
+    </div>
+    {% if error %}<p class="error"><strong>Error:</strong> {{ error }} {% endif %}
+</main>
+{% endblock main %}

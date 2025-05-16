@@ -1,0 +1,77 @@
+<!-- healthcare/templates/patient_health_data.html -->
+
+{% extends 'base.html' %}
+{% include './partials/_menu.html' %}
+
+{% block main %}
+<main>
+    {% if patient.blood_data %}
+    <h2>Analyse sanguine - {{ patient.first_name }} {{ patient.last_name }}</h2>
+    <form method="POST" action="{{ url_for('send_blood_reports', patient_id=patient.id) }}">
+        <div class="form-actions">
+            <button type="submit" class="btn-send-selected">Envoyer la sélection par email</button>
+        </div>
+        <table class="jobs">
+            <thead>
+            <tr>
+                <th>Sélectionner</th>
+                <th>Date</th>
+                <th>Hémoglobine (g/dL)</th>
+                <th>Hématocrite (%)</th>
+                <th>Leucocytes (/mm3)</th>
+                <th>Hématies (/mm3)</th>
+                <th>Plaquettes (/mm3)</th>
+                <th>Créatinine (/mm3)</th>
+                <th>Urée (mg/L)</th>
+                <th>Glycémie (g/L)</th>
+                <th>Cholestérol Total (g/L)</th>
+                <th>HDL (g/L)</th>
+                <th>LDL (g/L)</th>
+                <th>Triglycérides (g/L)</th>
+                <th>TSH (mUI/L)</th>
+                <th>PSA (ng/mL)</th>
+                <th>ALT (UI/L)</th>
+                <th>AST (UI/L)</th>
+                <th>Fer (µg/dL)</th>
+                <th>Vitamine D (ng/mL)</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for data in patient.blood_data %}
+                <tr>
+                    <td>
+                        <input type="checkbox"
+                               name="selected_reports"
+                               value="{{ data.id }}"
+                               id="report-{{ data.id }}"
+                               aria-label="Sélectionner le rapport du {{ data.date_analyse.strftime('%d/%m/%Y') }}">
+                    </td>
+                    <td>{{ data.date_analyse.strftime('%A %d %B %Y à %Hh%M') }}</td>
+                    <td>{{ data.hemoglobine }}</td>
+                    <td>{{ data.hematocrite }}</td>
+                    <td>{{ data.globules_blancs }}</td>
+                    <td>{{ data.globules_rouges }}</td>
+                    <td>{{ data.plaquettes }}</td>
+                    <td>{{ data.creatinine }}</td>
+                    <td>{{ data.uree }}</td>
+                    <td>{{ data.glycemie }}</td>
+                    <td>{{ data.cholesterol_total }}</td>
+                    <td>{{ data.hdl }}</td>
+                    <td>{{ data.ldl }}</td>
+                    <td>{{ data.triglycerides }}</td>
+                    <td>{{ data.tsh }}</td>
+                    <td>{{ data.psa }}</td>
+                    <td>{{ data.alt }}</td>
+                    <td>{{ data.ast }}</td>
+                    <td>{{ data.fer }}</td>
+                    <td>{{ data.vitamine_d }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </form>
+    {% else %}
+    <p style="font-size: 16px; text-align: center;">Aucune analyse sanguine connue pour {{ patient.first_name }} {{ patient.last_name }} ✌️</p>
+    {% endif %}
+</main>
+{% endblock main %}

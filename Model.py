@@ -10,7 +10,8 @@ from typing import Optional, Match
 
 from dateutil.relativedelta import relativedelta
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import DateTime, ForeignKey
+from flask_sqlalchemy.model import Model
+from sqlalchemy import DateTime, ForeignKey, Column, Float, Integer, String, Boolean, Text
 from sqlalchemy.orm import relationship, validates
 from werkzeug.security import generate_password_hash
 
@@ -24,45 +25,73 @@ class Role(Enum):
 
 class HealthData(db.Model):
 	__tablename__ = 'health_data'
-	id = db.Column(db.Integer, primary_key=True)
-	weight = db.Column(db.Float, nullable=False)
-	height = db.Column(db.Float, nullable=False)
-	heart_rate = db.Column(db.Integer, nullable=False)
-	# blood_pressure = db.Column(db.String(10), nullable=False)
-	blood_pressure_sys = db.Column(db.Integer, nullable=False)
-	blood_pressure_dia = db.Column(db.Integer, nullable=False)
-	temperature = db.Column(db.Float, nullable=False)
-	notes = db.Column(db.Text, nullable=True)
-	creation_date = db.Column(db.DateTime, nullable=False)
+	id = Column(Integer, primary_key=True)
+	weight = Column(Float, nullable=False)
+	height = Column(Float, nullable=False)
+	heart_rate = Column(Integer, nullable=False)
+	# blood_pressure = Column(String(10), nullable=False)
+	blood_pressure_sys = Column(Integer, nullable=False)
+	blood_pressure_dia = Column(Integer, nullable=False)
+	temperature = Column(Float, nullable=False)
+	notes = Column(Text, nullable=True)
+	creation_date = Column(DateTime, nullable=False)
 	# Define a foreign key column referencing the 'patient' table
-	patient_id = db.Column(db.Integer, ForeignKey('patient.id'), nullable=False)
+	patient_id = Column(Integer, ForeignKey('patients.id'), nullable=False)
 
 class Patient(db.Model):
-	__tablename__ = 'patient'
-	id = db.Column(db.Integer, primary_key=True)
-	first_name = db.Column(db.String(20), nullable=False)
-	last_name = db.Column(db.String(20), nullable=False)
-	# email = db.Column(db.String(120), unique=True, nullable=False)
-	email = db.Column(db.String(120), nullable=False)
-	phone = db.Column(db.String(20), nullable=False)
-	creation_date = db.Column(db.DateTime, nullable=False)
-	user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+	__tablename__ = 'patients'
+	id = Column(Integer, primary_key=True)
+	first_name = Column(String(20), nullable=False)
+	last_name = Column(String(20), nullable=False)
+	# email = Column(String(120), unique=True, nullable=False)
+	email = Column(String(120), nullable=False)
+	phone = Column(String(20), nullable=False)
+	creation_date = Column(DateTime, nullable=False)
+	user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
 
 	health_data = relationship('HealthData', backref='patient', cascade='all, delete-orphan')
+	blood_data = relationship('AnalyseSanguine', backref='patient', cascade='all, delete-orphan')
+
+class AnalyseSanguine(db.Model):
+	__tablename__ = 'analyses'
+	id = Column(Integer, primary_key=True)
+	patient_id = Column(Integer, ForeignKey('patients.id'))
+	# date_analyse = Column(DateTime, default=datetime.now)
+	date_analyse = Column(DateTime, nullable = False)
+
+	# Marqueurs biologiques
+	hemoglobine = Column(Float)  # g/dL
+	hematocrite = Column(Float)  # %
+	globules_blancs = Column(Integer)  # /mm3
+	globules_rouges = Column(Integer)  # /mm3
+	plaquettes = Column(Integer)  # /mm3
+	creatinine = Column(Float)  # mg/L
+	uree = Column(Integer)  # mg/L
+	glycemie = Column(Float)  # g/L
+	cholesterol_total = Column(Float)  # g/L
+	hdl = Column(Float)  # g/L
+	ldl = Column(Float)  # g/L
+	triglycerides = Column(Float)  # g/L
+	tsh = Column(Float)  # mUI/L
+	psa = Column(Float)  # ng/mL
+	alt = Column(Integer)  # UI/L
+	ast = Column(Integer)  # UI/L
+	fer = Column(Float)  # µg/dL
+	vitamine_d = Column(Integer)  # ng/mL
 
 class User(db.Model):
 	__tablename__ = 'user'
-	id = db.Column(db.Integer, primary_key=True)
-	username = db.Column(db.String(20), unique=True, nullable=False)
-	password = db.Column(db.String(60), nullable=False)
-	role = db.Column(db.Integer)
-	creationDate = db.Column(db.DateTime, nullable=False)
-	email = db.Column(db.String(120), unique=True, nullable=False)
-	recovery_token = db.Column(db.String(128))
-	token_expiration = db.Column(db.DateTime)
-	validated = db.Column(db.Boolean, default=False)
+	id = Column(Integer, primary_key=True)
+	username = Column(String(20), unique=True, nullable=False)
+	password = Column(String(60), nullable=False)
+	role = Column(Integer)
+	creationDate = Column(DateTime, nullable=False)
+	email = Column(String(120), unique=True, nullable=False)
+	recovery_token = Column(String(128))
+	token_expiration = Column(DateTime)
+	validated = Column(Boolean, default=False)
 
-	patients = db.relationship('Patient', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+	patients = relationship('Patient', backref='user', lazy='dynamic', cascade='all, delete-orphan')
 
 	def __repr__(self):
 		return f'{self.username}:{self.password} ({Role(self.role)})'
@@ -116,13 +145,13 @@ class BrowserInfo:
 
 class Session(db.Model):
 	__tablename__ = 'sessions'
-	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-	start = db.Column(db.DateTime, nullable=False)
-	end = db.Column(db.DateTime, nullable=True)
-	client_ip = db.Column(db.String(15), nullable=False)
-	browser_family = db.Column(db.String(20), nullable=False)
-	browser_version = db.Column(db.String(10), nullable=False)
-	login_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+	id = Column(Integer, primary_key=True, autoincrement=True)
+	start = Column(DateTime, nullable=False)
+	end = Column(DateTime, nullable=True)
+	client_ip = Column(String(15), nullable=False)
+	browser_family = Column(String(20), nullable=False)
+	browser_version = Column(String(10), nullable=False)
+	login_id = Column(Integer, ForeignKey('user.id'), nullable=False)
 
 	def __repr__(self):
 		user: User = User.query.get(self.login_id)
