@@ -1,5 +1,7 @@
 # 🩺 Healthcare – Historique médical simplifié pour les médecins non informatisés
 
+https://pmourey.github.io/healthcare/
+
 **Healthcare** est une application web légère et sécurisée, conçue pour aider les médecins à conserver un historique structuré des **consultations et données patient**.
 
 💡 Développée avec [Flask](https://flask.palletsprojects.com/), hébergée sur [PythonAnywhere](https://www.pythonanywhere.com/), cette solution vise particulièrement les professionnels de santé **non équipés de logiciels métiers**.
