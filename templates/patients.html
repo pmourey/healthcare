@@ -1,46 +1,72 @@
-<!-- healthcare/templates/patients.html -->
-
 {% extends 'base.html' %}
 {% include './partials/_menu.html' %}
 
 {% block main %}
-<main>
+<div class="container-fluid py-4">
     {% if patients %}
-    <h2>Liste des patients du Docteur {{ user.username }} :-)</h2>
-    <table class="jobs">
-        <thead>
-        <tr>
-            <th>Visites</th>
-            <th>Analyses</th>
-            <th>Nouvelle visite</th>
-            <th>Nouvelle analyse</th>
-            <th>Graphiques</th>
-            <th>Prénom</th>
-            <th>Nom</th>
-            <th>E-Mail</th>
-            <th>Téléphone</th>
-            <th>Date création</th>
-        </tr>
-        </thead>
-        {% for patient in patients %}
-        <div id="job">
-            <tr>
-                <td><button><a href="{{ url_for('show_health_data', id=patient.id) }}" class="button">Consulter</a></button></td>
-                <td><button><a href="{{ url_for('show_blood_data', id=patient.id) }}" class="button">Consulter</a></button></td>
-                <td><button><a href="{{ url_for('new_health_data', id=patient.id) }}" class="button">Créer</a></button></td>
-                <td><button><a href="{{ url_for('new_blood_data', id=patient.id) }}" class="button">Créer</a></button></td>
-                <td><button><a href="{{ url_for('patient_report', id=patient.id) }}" class="button">Consulter</a></button></td>
-                <td>{{ patient.first_name }}</td>
-                <td>{{ patient.last_name }}</td>
-                <td>{{ patient.email }}</td>
-                <td>{{ patient.phone }}</td>
-                <td>{{patient.creation_date.strftime('%A %d %B %Y')}}</td>
-            </tr>
-        </div>
-        {%endfor %}
-    </table>
+    <h2 class="text-center mb-4">Patients du Dr {{ user.username }}</h2>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Actions</th>
+                    <th>Nom</th>
+                    <th>Contact</th>
+                    <th>Date création</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in patients %}
+                <tr>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary btn-sm dropdown-toggle"
+                                    data-bs-toggle="dropdown">
+                                Actions
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('show_health_data', id=patient.id) }}">
+                                    <i class="bi bi-journal-medical"></i> Visites
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('show_blood_data', id=patient.id) }}">
+                                    <i class="bi bi-droplet"></i> Analyses
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('new_health_data', id=patient.id) }}">
+                                    <i class="bi bi-plus-circle"></i> Nouvelle visite
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('new_blood_data', id=patient.id) }}">
+                                    <i class="bi bi-plus-circle"></i> Nouvelle analyse
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('select_markers', id=patient.id) }}">
+                                    <i class="bi bi-graph-up"></i> Graphiques
+                                </a></li>
+                            </ul>
+                        </div>
+                    </td>
+                    <td>
+                        {{ patient.first_name }} {{ patient.last_name }}
+                    </td>
+                    <td>
+                        <a href="mailto:{{ patient.email }}" class="text-decoration-none me-3">
+                            <i class="bi bi-envelope"></i> {{ patient.email }}
+                        </a>
+                        <a href="tel:{{ patient.phone }}" class="text-decoration-none">
+                            <i class="bi bi-telephone"></i> {{ patient.phone }}
+                        </a>
+                    </td>
+                    <td>{{patient.creation_date.strftime('%d/%m/%Y')}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% else %}
-    <p style="font-size: 16px; text-align: center;">Aucun patient défini pour le Docteur {{ user.username }} ✌️</p>
+    <div class="alert alert-info text-center" role="alert">
+        Aucun patient défini pour le Dr {{ user.username }}
+    </div>
     {% endif %}
-</main>
+</div>
 {% endblock main %}

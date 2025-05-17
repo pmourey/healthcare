@@ -38,6 +38,7 @@ function initializeHealthChart(dates, weights, bloodPressureSys, bloodPressureDi
     });
 
 }
+
 function sendEmail(email, firstName, lastName) {
     // Récupérer le canvas du graphique
     const canvas = document.getElementById('healthChart');
@@ -90,4 +91,33 @@ function sendEmail(email, firstName, lastName) {
         sendButton.disabled = false;
         sendButton.textContent = 'Envoyer le rapport par mail';
     });
+}
+
+function toggleHealthChecks(source, state) {
+    var checkboxes = document.getElementsByClassName('health-marker');
+    for(var i=0; i<checkboxes.length; i++) {
+        checkboxes[i].checked = state;
+    }
+    // Décocher l'autre bouton de sélection
+    if (source.id === 'select_all_health') {
+        document.getElementById('deselect_all_health').checked = false;
+    } else {
+        document.getElementById('select_all_health').checked = false;
+    }
+    source.checked = false;  // Décocher le bouton après utilisation
+}
+
+
+function toggleBloodChecks(source, state) {
+    var checkboxes = document.getElementsByClassName('blood-marker');
+    for(var i=0; i<checkboxes.length; i++) {
+        checkboxes[i].checked = state;
+    }
+    // Décocher l'autre bouton de sélection
+    if (source.id === 'select_all_blood') {
+        document.getElementById('deselect_all_blood').checked = false;
+    } else {
+        document.getElementById('select_all_blood').checked = false;
+    }
+    source.checked = false;  // Décocher le bouton après utilisation
 }

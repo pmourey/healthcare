@@ -31,7 +31,7 @@
 
 <body>
     <h2>Analyse(s) sanguine(s) - {{ patient.first_name }} {{ patient.last_name }}</h2>
-    {% for data in reports %}
+    {% for data in reports|sort(attribute='date_analyse', reverse=true) %}
     <h3>Analyse du {{ data.date_analyse.strftime('%A %d %B %Y à %Hh%M') }}</h3>
     <table>
         <tr>

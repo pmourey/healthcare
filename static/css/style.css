@@ -237,3 +237,42 @@ th {
 td[title] {
     cursor: help;
 }
+
+# Select markers
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 1rem;
+}
+
+.card-header {
+    font-weight: bold;
+}
+
+.custom-control {
+    margin-bottom: 0.5rem;
+}
+
+.custom-control-label {
+    cursor: pointer;
+}
+
+.btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.25rem;
+}
+
+# with align
+.form-check {
+    padding-left: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-check-input {
+    margin-top: 0;  /* Supprime la marge par défaut */
+    margin-left: 0; /* Supprime la marge par défaut */
+}
+
+.form-check-label {
+    margin-bottom: 0; /* Supprime la marge par défaut */
+}
+

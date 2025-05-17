@@ -1,60 +1,145 @@
-<!-- healthcare/templates/accounts.html -->
-
 {% extends 'base.html' %}
 {% block main %}
-<script>
-    function confirmDelete(userId) {
-        var result = confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?");
-        if (result) {
-            window.location.href = "delete_account/" + userId;
-        }
-    }
-</script>
-<main>
+<div class="container-fluid py-4">
     {% include './partials/_menu.html' %}
     {% if accounts %}
-    <table class="accounts">
-        <thead>
-        <tr>
-            {% if user.is_admin %}
-            <th>Update</th>
-            <th>Delete</th>
-            {% endif %}
-            <th>Login</th>
-            <th>Date création</th>
-            <th>Type</th>
-        </tr>
-        </thead>
-        {% for account in accounts %}
-        <div id="account">
-            <tr>
-                {% if user.is_admin %}
-                <td align="center">
-                    {% if user.id != account.id %}
-                    <a href="{{ url_for('update_account', id=account.id) }}">{{account.id}}</a>
-                    {% endif %}
-                </td>
-                <td align="center">
-                    {% if user.id != account.id %}
-                    <button onclick="confirmDelete({{ account.id }})">{{account.id}}</button>
-                    {% endif %}
-                </td>
-                {% endif %}
-                <td>{{ account.username }}</td>
-                <td>{{ account.creationDate|format_paris_time }}</td>
-                <td>
-                    {% if account.is_admin %}
-                        Administrateur
-                    {% elif account.is_editor %}
-                        Editeur
-                    {% else %}
-                        Utilisateur
-                    {% endif %}
-                </td>
-            </tr>
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <h2 class="h5 mb-0">
+                <i class="bi bi-people-fill me-2"></i>
+                Gestion des comptes
+            </h2>
         </div>
-        {%endfor %}
-    </table>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            {% if user.is_admin %}
+                            <th scope="col" class="text-center">Modifier</th>
+                            <th scope="col" class="text-center">Supprimer</th>
+                            {% endif %}
+                            <th scope="col">Login</th>
+                            <th scope="col">Date création</th>
+                            <th scope="col">Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for account in accounts %}
+                        <tr>
+                            {% if user.is_admin %}
+                            <td class="text-center">
+                                {% if user.id != account.id %}
+                                <a href="{{ url_for('update_account', id=account.id) }}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if user.id != account.id %}
+                                <button class="btn btn-sm btn-outline-danger"
+                                        onclick="confirmDelete({{ account.id }})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                                {% endif %}
+                            </td>
+                            {% endif %}
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-person-circle text-primary me-2"></i>
+                                    {{ account.username }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-calendar-event text-secondary me-2"></i>
+                                    {{ account.creationDate|format_paris_time }}
+                                </div>
+                            </td>
+                            <td>
+                                {% if account.is_admin %}
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-shield-fill me-1"></i>
+                                    Administrateur
+                                </span>
+                                {% elif account.is_editor %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-pencil-fill me-1"></i>
+                                    Editeur
+                                </span>
+                                {% else %}
+                                <span class="badge bg-info">
+                                    <i class="bi bi-person-fill me-1"></i>
+                                    Utilisateur
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        <i class="bi bi-info-circle me-2"></i>
+        Aucun compte disponible
+    </div>
     {% endif %}
-</main>
+</div>
+
+<!-- Modal de confirmation de suppression -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    Confirmation de suppression
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer cet utilisateur ?</p>
+                <p class="text-muted small mb-0">Cette action est irréversible.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-2"></i>Annuler
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="bi bi-trash me-2"></i>Supprimer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDelete(userId) {
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+    document.getElementById('confirmDeleteBtn').onclick = function() {
+        window.location.href = "delete_account/" + userId;
+    };
+    deleteModal.show();
+}
+
+document.getElementById('deleteConfirmModal').addEventListener('hidden.bs.modal', function () {
+    document.getElementById('confirmDeleteBtn').onclick = null;
+});
+</script>
+
+<style>
+.card {
+    border-radius: 0.5rem;
+}
+.modal-content {
+    border-radius: 0.5rem;
+}
+.table td {
+    white-space: nowrap;
+}
+</style>
 {% endblock main %}

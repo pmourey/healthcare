@@ -1,53 +1,109 @@
-<!-- healthcare/templates/patient_health_data.html -->
-
 {% extends 'base.html' %}
 {% include './partials/_menu.html' %}
 
 {% block main %}
-<main>
+<div class="container-fluid py-4">
     {% if patient.health_data %}
-    <h2>Données de santé - {{ patient.first_name }} {{ patient.last_name }}</h2>
-    <form method="POST" action="{{ url_for('send_health_reports', patient_id=patient.id) }}">
-        <div class="form-actions">
-            <button type="submit" class="btn-send-selected">Envoyer la sélection par email</button>
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="h3">
+                <i class="bi bi-clipboard2-pulse me-2"></i>
+                Données de santé - {{ patient.first_name }} {{ patient.last_name }}
+            </h2>
         </div>
-        <table class="jobs">
-            <thead>
-            <tr>
-                <th>Sélectionner</th>
-                <th>Date visite</th>
-                <th>Poids</th>
-                <th>Taille</th>
-                <th>Pulsation cardiaque</th>
-                <th>Pression artérielle (Sys/Dia)</th>
-                <th>Température</th>
-                <th>Infos diverses</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for data in patient.health_data %}
-                <tr>
-                    <td>
-                        <input type="checkbox"
-                               name="selected_reports"
-                               value="{{ data.id }}"
-                               id="report-{{ data.id }}"
-                               aria-label="Sélectionner le rapport du {{ data.creation_date.strftime('%d/%m/%Y') }}">
-                    </td>
-                    <td>{{ data.creation_date.strftime('%A %d %B %Y à %Hh%M') }}</td>
-                    <td>{{ data.weight }}</td>
-                    <td>{{ data.height }}</td>
-                    <td>{{ data.heart_rate }}</td>
-                    <td>{{ data.blood_pressure_sys }}/{{ data.blood_pressure_dia }}</td>
-                    <td>{{ data.temperature }}</td>
-                    <td>{{ data.notes }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+    </div>
+
+    <form method="POST" action="{{ url_for('send_health_reports', patient_id=patient.id) }}">
+        <!-- Bouton d'envoi -->
+        <div class="row mb-3">
+            <div class="col">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-envelope-fill me-2"></i>
+                    Envoyer la sélection par email
+                </button>
+            </div>
+        </div>
+
+        <!-- Tableau des données -->
+        <div class="table-responsive">
+            <table class="table table-hover table-striped align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-center">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="selectAll">
+                                <label class="form-check-label" for="selectAll">Tout</label>
+                            </div>
+                        </th>
+                        <th>Date visite</th>
+                        <th>Poids (kg)</th>
+                        <th>Taille (cm)</th>
+                        <th>Pulsation (bpm)</th>
+                        <th>Pression (Sys/Dia)</th>
+                        <th>Température (°C)</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in patient.health_data %}
+                    <tr>
+                        <td class="text-center">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox"
+                                       name="selected_reports" value="{{ data.id }}"
+                                       id="check{{ data.id }}">
+                            </div>
+                        </td>
+                        <td>{{ data.creation_date.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>{{ data.weight }}</td>
+                        <td>{{ data.height }}</td>
+                        <td>{{ data.heart_rate }}</td>
+                        <td>{{ data.blood_pressure_sys }}/{{ data.blood_pressure_dia }}</td>
+                        <td>{{ "%.1f"|format(data.temperature) }}</td>
+                        <td>
+                            {% if data.notes %}
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-info"
+                                    data-bs-toggle="popover"
+                                    data-bs-content="{{ data.notes }}"
+                                    data-bs-trigger="focus">
+                                <i class="bi bi-info-circle"></i>
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </form>
+
     {% else %}
-    <p style="font-size: 16px; text-align: center;">Aucune donnée de santé connue pour {{ patient.first_name }} {{ patient.last_name }} ✌️</p>
+    <div class="alert alert-info" role="alert">
+        <i class="bi bi-info-circle me-2"></i>
+        Aucune donnée de santé disponible pour ce patient.
+    </div>
     {% endif %}
-</main>
+</div>
+
+<script>
+// Activation des popovers Bootstrap
+document.addEventListener('DOMContentLoaded', function() {
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl)
+    });
+
+    // Gestion de la case "Tout sélectionner"
+    const selectAllCheckbox = document.getElementById('selectAll');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('input[name="selected_reports"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+        });
+    }
+});
+</script>
 {% endblock main %}
