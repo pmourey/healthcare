@@ -13,84 +13,98 @@
         th {
             background-color: #f5f5f5;
         }
+        .text-danger {
+            color: #dc3545 !important;
+        }
+
+        .fw-bold {
+            font-weight: bold;
+        }
+
+        td[title] {
+            cursor: help;
+        }
     </style>
 </head>
+
+{% import './partials/_macros.html' as macros %}
+
 <body>
     <h2>Analyse(s) sanguine(s) - {{ patient.first_name }} {{ patient.last_name }}</h2>
-    {% for report in reports %}
-    <h3>Analyse du {{ report.date_analyse.strftime('%A %d %B %Y à %Hh%M') }}</h3>
+    {% for data in reports %}
+    <h3>Analyse du {{ data.date_analyse.strftime('%A %d %B %Y à %Hh%M') }}</h3>
     <table>
         <tr>
             <th>Hémoglobine (g/dL)</th>
-            <td>{{ report.hemoglobine }}</td>
+            {{ macros.display_value(data, 'hemoglobine') }}
         </tr>
         <tr>
             <th>Hématocrite (%)</th>
-            <td>{{ report.hematocrite }}</td>
+            {{ macros.display_value(data, 'hematocrite') }}
         </tr>
         <tr>
             <th>Leucocytes (/mm3)</th>
-            <td>{{ report.globules_blancs }}</td>
+            {{ macros.display_value(data, 'globules_blancs') }}
         </tr>
         <tr>
             <th>Hématies (/mm3)</th>
-            <td>{{ report.globules_rouges }}</td>
+            {{ macros.display_value(data, 'globules_rouges') }}
         </tr>
         <tr>
             <th>Plaquettes (/mm3)</th>
-            <td>{{ report.plaquettes }}</td>
+            {{ macros.display_value(data, 'plaquettes') }}
         </tr>
         <tr>
             <th>Créatinine (mg/L)</th>
-            <td>{{ report.creatinine }}</td>
+            {{ macros.display_value(data, 'creatinine') }}
         </tr>
         <tr>
             <th>Urée (mg/L)</th>
-            <td>{{ report.uree }}</td>
+            {{ macros.display_value(data, 'uree') }}
         </tr>
         <tr>
             <th>Glycémie (g/L)</th>
-            <td>{{ report.glycemie }}</td>
+            {{ macros.display_value(data, 'glycemie') }}
         </tr>
         <tr>
             <th>Cholestérol Total (g/L)</th>
-            <td>{{ report.cholesterol_total }}</td>
+            {{ macros.display_value(data, 'cholesterol_total') }}
         </tr>
         <tr>
             <th>HDL (g/L)</th>
-            <td>{{ report.hdl }}</td>
+            {{ macros.display_value(data, 'hdl') }}
         </tr>
         <tr>
             <th>LDL (g/L)</th>
-            <td>{{ report.ldl }}</td>
+            {{ macros.display_value(data, 'ldl') }}
         </tr>
         <tr>
             <th>Triglycérides (g/L)</th>
-            <td>{{ report.triglycerides }}</td>
+            {{ macros.display_value(data, 'triglycerides') }}
         </tr>
         <tr>
             <th>TSH (mUI/L)</th>
-            <td>{{ report.tsh }}</td>
+            {{ macros.display_value(data, 'tsh') }}
         </tr>
         <tr>
             <th>PSA (ng/mL)</th>
-            <td>{{ report.psa }}</td>
+            {{ macros.display_value(data, 'psa') }}
         </tr>
         <tr>
             <th>ALT (UI/L)</th>
-            <td>{{ report.alt }}</td>
+            {{ macros.display_value(data, 'alt') }}
         </tr>
         <tr>
             <th>AST (UI/L)</th>
-            <td>{{ report.ast }}</td>
+            {{ macros.display_value(data, 'ast') }}
         </tr>
         <tr>
             <th>Fer (µg/dL)</th>
-            <td>{{ report.fer }}</td>
+            {{ macros.display_value(data, 'fer') }}
         </tr>
         <tr>
             <th>Vitamine D (ng/mL)</th>
-            <td>{{ report.vitamine_d }}</td>
+            {{ macros.display_value(data, 'vitamine_d') }}
         </tr>
     </table>
     {% endfor %}

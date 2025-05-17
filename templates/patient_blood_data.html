@@ -2,6 +2,7 @@
 
 {% extends 'base.html' %}
 {% include './partials/_menu.html' %}
+{% import './partials/_macros.html' as macros %}
 
 {% block main %}
 <main>
@@ -16,24 +17,24 @@
             <tr>
                 <th>Sélectionner</th>
                 <th>Date</th>
-                <th>Hémoglobine (g/dL)</th>
-                <th>Hématocrite (%)</th>
-                <th>Leucocytes (/mm3)</th>
-                <th>Hématies (/mm3)</th>
-                <th>Plaquettes (/mm3)</th>
-                <th>Créatinine (/mm3)</th>
-                <th>Urée (mg/L)</th>
-                <th>Glycémie (g/L)</th>
-                <th>Cholestérol Total (g/L)</th>
-                <th>HDL (g/L)</th>
-                <th>LDL (g/L)</th>
-                <th>Triglycérides (g/L)</th>
-                <th>TSH (mUI/L)</th>
-                <th>PSA (ng/mL)</th>
-                <th>ALT (UI/L)</th>
-                <th>AST (UI/L)</th>
-                <th>Fer (µg/dL)</th>
-                <th>Vitamine D (ng/mL)</th>
+                <th>Hémoglobine</th>
+                <th>Hématocrite</th>
+                <th>Leucocytes</th>
+                <th>Hématies</th>
+                <th>Plaquettes</th>
+                <th>Créatinine</th>
+                <th>Urée</th>
+                <th>Glycémie</th>
+                <th>Cholestérol Total</th>
+                <th>HDL</th>
+                <th>LDL</th>
+                <th>Triglycérides</th>
+                <th>TSH</th>
+                <th>PSA</th>
+                <th>ALT</th>
+                <th>AST</th>
+                <th>Fer</th>
+                <th>Vitamine D</th>
             </tr>
             </thead>
             <tbody>
@@ -47,24 +48,12 @@
                                aria-label="Sélectionner le rapport du {{ data.date_analyse.strftime('%d/%m/%Y') }}">
                     </td>
                     <td>{{ data.date_analyse.strftime('%A %d %B %Y à %Hh%M') }}</td>
-                    <td>{{ data.hemoglobine }}</td>
-                    <td>{{ data.hematocrite }}</td>
-                    <td>{{ data.globules_blancs }}</td>
-                    <td>{{ data.globules_rouges }}</td>
-                    <td>{{ data.plaquettes }}</td>
-                    <td>{{ data.creatinine }}</td>
-                    <td>{{ data.uree }}</td>
-                    <td>{{ data.glycemie }}</td>
-                    <td>{{ data.cholesterol_total }}</td>
-                    <td>{{ data.hdl }}</td>
-                    <td>{{ data.ldl }}</td>
-                    <td>{{ data.triglycerides }}</td>
-                    <td>{{ data.tsh }}</td>
-                    <td>{{ data.psa }}</td>
-                    <td>{{ data.alt }}</td>
-                    <td>{{ data.ast }}</td>
-                    <td>{{ data.fer }}</td>
-                    <td>{{ data.vitamine_d }}</td>
+
+                    {% for field in ['hemoglobine', 'hematocrite', 'globules_blancs', 'globules_rouges', 'plaquettes', 'creatinine', 'uree', 'glycemie', 'cholesterol_total', 'hdl', 'ldl', 'triglycerides', 'tsh', 'psa', 'alt', 'ast', 'fer', 'vitamine_d'] %}
+                        <td {{ macros.check_threshold(data[field], macros.thresholds[field].min, macros.thresholds[field].max) }}>
+                            {{ data[field] }}{% if data[field] is not none %} {{ macros.thresholds[field].unit }}{% endif %}
+                        </td>
+                    {% endfor %}
                 </tr>
             {% endfor %}
             </tbody>

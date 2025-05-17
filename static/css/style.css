@@ -224,3 +224,16 @@ th {
         display: none;
     }
 }
+
+# Danger
+.text-danger {
+    color: #dc3545 !important;
+}
+
+.fw-bold {
+    font-weight: bold;
+}
+
+td[title] {
+    cursor: help;
+}
