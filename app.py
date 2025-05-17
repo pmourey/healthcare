@@ -36,7 +36,6 @@ from datetime import datetime, timedelta
 from decorators import is_connected, is_admin
 from tools.send_emails import send_email
 
-
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 # Set the secret key
 app.secret_key = secrets.token_bytes(32).hex()
@@ -154,6 +153,7 @@ def register():
 					error = str(e)
 	return render_template('register.html', error=error)
 
+
 @csrf.exempt
 @app.route("/login", methods=['GET', 'POST'])
 def login():
@@ -182,6 +182,7 @@ def login():
 			return render_template('login.html', error=error)
 	return render_template('login.html', error=error)
 
+
 @csrf.exempt
 @app.route("/change_password", methods=['GET', 'POST'])
 @is_connected
@@ -208,6 +209,7 @@ def change_password():
 		else:
 			error = 'Passwords does not match! Please try again.'
 	return render_template('reset_password.html', error=error)
+
 
 @csrf.exempt
 @app.route('/request_reset_password', methods=['GET', 'POST'])
@@ -274,6 +276,7 @@ def validate_email(token):
 
 	flash('Votre compte a été confirmé avec succès.', 'success')
 	return redirect(url_for('login'))
+
 
 @csrf.exempt
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
@@ -350,7 +353,7 @@ def show_accounts():
 	accounts = User.query.order_by(desc(User.id)).all()
 	return render_template('accounts.html', accounts=accounts, user=user)
 
-
+@csrf.exempt
 @app.route('/update_account/<int:id>', methods=['GET', 'POST'])
 @is_connected
 @is_admin
@@ -374,6 +377,7 @@ def show_sessions():
 	# Reverse order query
 	sessions = Session.query.filter(Session.end.is_(None)).order_by(desc(Session.id)).all()
 	return render_template('sessions.html', sessions=sessions)
+
 
 @csrf.exempt
 @app.route('/new_patient/', methods=['GET', 'POST'])
@@ -403,6 +407,7 @@ def new_patient():
 				return redirect(url_for('new_patient'))
 
 	return render_template('new_patient.html')
+
 
 @csrf.exempt
 @app.route('/new_health_data/<int:id>', methods=['GET', 'POST'])
@@ -435,6 +440,7 @@ def new_health_data(id: int):
 def show_health_data(id: int):
 	patient = Patient.query.get_or_404(id)
 	return render_template('patient_health_data.html', patient=patient)
+
 
 @csrf.exempt
 @app.route('/new_blood_data_old/<int:id>', methods=['GET', 'POST'])
@@ -518,12 +524,14 @@ def new_blood_data(id: int):
 
 	return render_template('new_blood_data.html', patient=patient)
 
+
 @app.route('/show_blood_data/<int:id>')
 @is_connected
 def show_blood_data(id: int):
 	patient = Patient.query.get_or_404(id)
 	thresholds = {'hemoglobine': {'min': 13.0, 'max': 18.0, 'unit': 'g/dL'}, 'hematocrite': {'min': 37.0, 'max': 50.0, 'unit': '%'}, 'globules_blancs': {'min': 4000, 'max': 11000, 'unit': '/mm³'}, 'globules_rouges': {'min': 4.6e6, 'max': 6.2e6, 'unit': '/mm³'}, 'plaquettes': {'min': 150000, 'max': 400000, 'unit': '/mm³'}, 'creatinine': {'min': 7.2, 'max': 11.8, 'unit': 'mg/L'}, 'uree': {'min': 35, 'max': 72, 'unit': 'mg/L'}, 'glycemie': {'min': 0.74, 'max': 1.06, 'unit': 'g/L'}, 'cholesterol_total': {'min': 0, 'max': 2, 'unit': 'g/L'}, 'hdl': {'min': 0.4, 'max': 0.6, 'unit': 'g/L'}, 'ldl': {'min': 0, 'max': 1.30, 'unit': 'g/L'}, 'triglycerides': {'min': 0, 'max': 1.5, 'unit': 'g/L'}, 'tsh': {'min': 0.38, 'max': 5.33, 'unit': 'mUI/L'}, 'psa': {'min': 0, 'max': 4.0, 'unit': 'ng/mL'}, 'alt': {'min': 7, 'max': 50, 'unit': 'UI/L'}, 'ast': {'min': 8, 'max': 50, 'unit': 'UI/L'}, 'fer': {'min': 60, 'max': 170, 'unit': 'µg/dL'}, 'vitamine_d': {'min': 30, 'max': 100, 'unit': 'ng/mL'}}
 	return render_template('patient_blood_data.html', patient=patient, thresholds=thresholds)
+
 
 @app.route('/show_patients')
 @is_connected
@@ -550,16 +558,7 @@ def send_health_reports(patient_id):
 	user: User = get_user_by_id(session['login_id'])
 	# Fetch the selected reports
 	reports = HealthData.query.filter(HealthData.id.in_(selected_reports)).all()
-	if send_email(subject=f'Rapports de santé - {patient.first_name} {patient.last_name}',
-			   body=render_template('email/health_report.html', patient=patient, reports=reports),
-			   sender_email=user.email,
-			   recipient_email=patient.email,
-			   bcc_recipients=[],
-			   smtp_server=app.config['SMTP_SERVER'],
-			   smtp_port=app.config['SMTP_PORT'],
-			   username=app.config['GMAIL_USER'],
-			   password=app.config['GMAIL_APP_PWD'],
-			   author=app.config['GMAIL_FULLNAME']):
+	if send_email(subject=f'Rapports de santé - {patient.first_name} {patient.last_name}', body=render_template('email/health_report.html', patient=patient, reports=reports), sender_email=user.email, recipient_email=patient.email, bcc_recipients=[], smtp_server=app.config['SMTP_SERVER'], smtp_port=app.config['SMTP_PORT'], username=app.config['GMAIL_USER'], password=app.config['GMAIL_APP_PWD'], author=app.config['GMAIL_FULLNAME']):
 
 		flash('Rapports envoyés avec succès', 'success')
 	else:
@@ -582,16 +581,7 @@ def send_blood_reports(patient_id):
 	user: User = get_user_by_id(session['login_id'])
 	# Fetch the selected reports
 	reports = AnalyseSanguine.query.filter(AnalyseSanguine.id.in_(selected_reports)).all()
-	if send_email(subject=f'Analyses de sang - {patient.first_name} {patient.last_name}',
-			   body=render_template('email/blood_report.html', patient=patient, reports=reports),
-			   sender_email=user.email,
-			   recipient_email=patient.email,
-			   bcc_recipients=[],
-			   smtp_server=app.config['SMTP_SERVER'],
-			   smtp_port=app.config['SMTP_PORT'],
-			   username=app.config['GMAIL_USER'],
-			   password=app.config['GMAIL_APP_PWD'],
-			   author=app.config['GMAIL_FULLNAME']):
+	if send_email(subject=f'Analyses de sang - {patient.first_name} {patient.last_name}', body=render_template('email/blood_report.html', patient=patient, reports=reports), sender_email=user.email, recipient_email=patient.email, bcc_recipients=[], smtp_server=app.config['SMTP_SERVER'], smtp_port=app.config['SMTP_PORT'], username=app.config['GMAIL_USER'], password=app.config['GMAIL_APP_PWD'], author=app.config['GMAIL_FULLNAME']):
 
 		flash('Rapports envoyés avec succès', 'success')
 	else:
@@ -660,7 +650,7 @@ def send_report_email():
 
 		# Envoyer l'email
 		success = send_email(subject=f'Rapport médical - {first_name} {last_name}', body=msg,  # Passer directement l'objet MIMEMultipart
-			sender_email=app.config['GMAIL_USER'], recipient_email=email, bcc_recipients=[], smtp_server=app.config['SMTP_SERVER'], smtp_port=app.config['SMTP_PORT'], username=app.config['GMAIL_USER'], password=app.config['GMAIL_APP_PWD'], author="Service Médical")
+							 sender_email=app.config['GMAIL_USER'], recipient_email=email, bcc_recipients=[], smtp_server=app.config['SMTP_SERVER'], smtp_port=app.config['SMTP_PORT'], username=app.config['GMAIL_USER'], password=app.config['GMAIL_APP_PWD'], author="Service Médical")
 
 		if success:
 			return jsonify({'success': True})
@@ -669,6 +659,20 @@ def send_report_email():
 
 	except Exception as e:
 		return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/select_markers/<int:id>')
+@is_connected
+def select_markers(id):
+	patient = Patient.query.get_or_404(id)
+	return render_template('select_markers.html', patient=patient)
+
+@csrf.exempt
+@app.route('/generate_graphs', methods=['POST'])
+@is_connected
+def generate_graphs():
+	health_markers = request.form.getlist('health_markers')
+	blood_markers = request.form.getlist('blood_markers')
+	app.logger.debug(f'health_markers: {health_markers}')
 
 
 @app.before_request
