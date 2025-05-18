@@ -7,114 +7,151 @@
 {% block main %}
 <main>
     {% if patient.blood_data %}
-    <h2>Analyse sanguine - {{ patient.first_name }} {{ patient.last_name }}</h2>
-    <form method="POST" action="{{ url_for('send_blood_reports', patient_id=patient.id) }}">
-        <div class="form-actions">
-            <button type="submit" class="btn-send-selected">Envoyer la sélection par email</button>
-        </div>
-        <div class="container-fluid py-4">
-            <div class="table-responsive">
-                <table class="table table-hover table-striped table-sm align-middle">
-                    <thead class="table-light sticky-top">
-                        <tr>
-                            <th scope="col">Date</th>
-                            <th scope="col" data-bs-toggle="tooltip" title="g/dL">
-                                <i class="bi bi-droplet-fill text-danger me-1"></i>Hémoglobine
-                            </th>
-                            <th scope="col" data-bs-toggle="tooltip" title="%">
-                                <i class="bi bi-percent text-danger me-1"></i>Hématocrite
-                            </th>
-                            <th scope="col" data-bs-toggle="tooltip" title="/mm³">
-                                <i class="bi bi-cells me-1"></i>Leucocytes
-                            </th>
-                            <th scope="col" data-bs-toggle="tooltip" title="/mm³">
-                                <i class="bi bi-cells me-1"></i>Hématies
-                            </th>
-                            <th scope="col" data-bs-toggle="tooltip" title="/mm³">
-                                <i class="bi bi-cells me-1"></i>Plaquettes
-                            </th>
-                            <th scope="col" data-bs-toggle="tooltip" title="mg/L">
-                                <i class="bi bi-graph-up me-1"></i>Créatinine
-                            </th>
-                            <th scope="col" data-bs-toggle="tooltip" title="mg/L">
-                                <i class="bi bi-graph-up me-1"></i>Urée
-                            </th>
-                            <th scope="col" data-bs-toggle="tooltip" title="g/L">
-                                <i class="bi bi-graph-up me-1"></i>Glycémie
-                            </th>
-                            <th scope="col" data-bs-toggle="tooltip" title="g/L">
-                                <i class="bi bi-heart-fill text-danger me-1"></i>Cholestérol Total
-                            </th>
-                            <th scope="col" data-bs-toggle="tooltip" title="g/L">
-                                <i class="bi bi-heart-fill text-success me-1"></i>HDL
-                            </th>
-                            <th scope="col" data-bs-toggle="tooltip" title="g/L">
-                                <i class="bi bi-heart-fill text-warning me-1"></i>LDL
-                            </th>
-                            <th scope="col" data-bs-toggle="tooltip" title="g/L">
-                                <i class="bi bi-heart-fill text-info me-1"></i>Triglycérides
-                            </th>
-                            <th scope="col" data-bs-toggle="tooltip" title="mUI/L">
-                                <i class="bi bi-shield-fill me-1"></i>TSH
-                            </th>
-                            <th scope="col" data-bs-toggle="tooltip" title="ng/mL">
-                                <i class="bi bi-shield-fill me-1"></i>PSA
-                            </th>
-                            <th scope="col" data-bs-toggle="tooltip" title="UI/L">
-                                <i class="bi bi-liver me-1"></i>ALT
-                            </th>
-                            <th scope="col" data-bs-toggle="tooltip" title="UI/L">
-                                <i class="bi bi-liver me-1"></i>AST
-                            </th>
-                            <th scope="col" data-bs-toggle="tooltip" title="µg/dL">
-                                <i class="bi bi-magnet-fill me-1"></i>Fer
-                            </th>
-                            <th scope="col" data-bs-toggle="tooltip" title="ng/mL">
-                                <i class="bi bi-sun-fill text-warning me-1"></i>Vitamine D
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for data in patient.blood_data|sort(attribute='date_analyse', reverse=true) %}
-                        <tr>
-                            <td>{{ data.date_analyse.strftime('%d/%m/%Y') }}</td>
-                            <td>{{ "%.1f"|format(data.hemoglobine) if data.hemoglobine }}</td>
-                            <td>{{ "%.1f"|format(data.hematocrite) if data.hematocrite }}</td>
-                            <td>{{ data.globules_blancs }}</td>
-                            <td>{{ data.globules_rouges }}</td>
-                            <td>{{ data.plaquettes }}</td>
-                            <td>{{ "%.1f"|format(data.creatinine) if data.creatinine }}</td>
-                            <td>{{ data.uree }}</td>
-                            <td>{{ "%.2f"|format(data.glycemie) if data.glycemie }}</td>
-                            <td>{{ "%.2f"|format(data.cholesterol_total) if data.cholesterol_total }}</td>
-                            <td>{{ "%.2f"|format(data.hdl) if data.hdl }}</td>
-                            <td>{{ "%.2f"|format(data.ldl) if data.ldl }}</td>
-                            <td>{{ "%.2f"|format(data.triglycerides) if data.triglycerides }}</td>
-                            <td>{{ "%.2f"|format(data.tsh) if data.tsh }}</td>
-                            <td>{{ "%.2f"|format(data.psa) if data.psa }}</td>
-                            <td>{{ data.alt }}</td>
-                            <td>{{ data.ast }}</td>
-                            <td>{{ "%.1f"|format(data.fer) if data.fer }}</td>
-                            <td>{{ "%.1f"|format(data.vitamine_d) if data.vitamine_d }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <div class="row mb-4">
+            <div class="col">
+                <h2 class="h3">
+                    <i class="bi bi-clipboard2-pulse me-2"></i>
+                    Analyse sanguine - {{ patient.first_name }} {{ patient.last_name }}
+                </h2>
             </div>
         </div>
-    </form>
+        <form method="POST" action="{{ url_for('send_blood_reports', patient_id=patient.id) }}">
+            <!-- Bouton d'envoi -->
+            <div class="row mb-3">
+                <div class="col">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-envelope-fill me-2"></i>
+                        Envoyer la sélection par email
+                    </button>
+                </div>
+            </div>
+            <div class="container-fluid py-4">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped table-sm align-middle">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th class="text-center">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="selectAll">
+                                        <label class="form-check-label" for="selectAll">Tout</label>
+                                    </div>
+                                </th>
+                                <th scope="col">Date</th>
+                                <th scope="col" data-bs-toggle="tooltip" title="g/dL">
+                                    <i class="bi bi-droplet-fill text-danger me-1"></i>Hémoglobine
+                                </th>
+                                <th scope="col" data-bs-toggle="tooltip" title="%">
+                                    <i class="bi bi-percent text-danger me-1"></i>Hématocrite
+                                </th>
+                                <th scope="col" data-bs-toggle="tooltip" title="/mm³">
+                                    <i class="bi bi-cells me-1"></i>Leucocytes
+                                </th>
+                                <th scope="col" data-bs-toggle="tooltip" title="/mm³">
+                                    <i class="bi bi-cells me-1"></i>Hématies
+                                </th>
+                                <th scope="col" data-bs-toggle="tooltip" title="/mm³">
+                                    <i class="bi bi-cells me-1"></i>Plaquettes
+                                </th>
+                                <th scope="col" data-bs-toggle="tooltip" title="mg/L">
+                                    <i class="bi bi-graph-up me-1"></i>Créatinine
+                                </th>
+                                <th scope="col" data-bs-toggle="tooltip" title="mg/L">
+                                    <i class="bi bi-graph-up me-1"></i>Urée
+                                </th>
+                                <th scope="col" data-bs-toggle="tooltip" title="g/L">
+                                    <i class="bi bi-graph-up me-1"></i>Glycémie
+                                </th>
+                                <th scope="col" data-bs-toggle="tooltip" title="g/L">
+                                    <i class="bi bi-heart-fill text-danger me-1"></i>Cholestérol Total
+                                </th>
+                                <th scope="col" data-bs-toggle="tooltip" title="g/L">
+                                    <i class="bi bi-heart-fill text-success me-1"></i>HDL
+                                </th>
+                                <th scope="col" data-bs-toggle="tooltip" title="g/L">
+                                    <i class="bi bi-heart-fill text-warning me-1"></i>LDL
+                                </th>
+                                <th scope="col" data-bs-toggle="tooltip" title="g/L">
+                                    <i class="bi bi-heart-fill text-info me-1"></i>Triglycérides
+                                </th>
+                                <th scope="col" data-bs-toggle="tooltip" title="mUI/L">
+                                    <i class="bi bi-shield-fill me-1"></i>TSH
+                                </th>
+                                <th scope="col" data-bs-toggle="tooltip" title="ng/mL">
+                                    <i class="bi bi-shield-fill me-1"></i>PSA
+                                </th>
+                                <th scope="col" data-bs-toggle="tooltip" title="UI/L">
+                                    <i class="bi bi-liver me-1"></i>ALT
+                                </th>
+                                <th scope="col" data-bs-toggle="tooltip" title="UI/L">
+                                    <i class="bi bi-liver me-1"></i>AST
+                                </th>
+                                <th scope="col" data-bs-toggle="tooltip" title="µg/dL">
+                                    <i class="bi bi-magnet-fill me-1"></i>Fer
+                                </th>
+                                <th scope="col" data-bs-toggle="tooltip" title="ng/mL">
+                                    <i class="bi bi-sun-fill text-warning me-1"></i>Vitamine D
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for data in patient.blood_data|sort(attribute='date_analyse', reverse=true) %}
+                            <tr>
+                                <td class="text-center">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox"
+                                               name="selected_reports" value="{{ data.id }}"
+                                               id="check{{ data.id }}">
+                                    </div>
+                                </td>
+                                <td>{{ data.date_analyse.strftime('%d/%m/%Y') }}</td>
+                                <td>{{ "%.1f"|format(data.hemoglobine) if data.hemoglobine }}</td>
+                                <td>{{ "%.1f"|format(data.hematocrite) if data.hematocrite }}</td>
+                                <td>{{ data.globules_blancs }}</td>
+                                <td>{{ data.globules_rouges }}</td>
+                                <td>{{ data.plaquettes }}</td>
+                                <td>{{ "%.1f"|format(data.creatinine) if data.creatinine }}</td>
+                                <td>{{ data.uree }}</td>
+                                <td>{{ "%.2f"|format(data.glycemie) if data.glycemie }}</td>
+                                <td>{{ "%.2f"|format(data.cholesterol_total) if data.cholesterol_total }}</td>
+                                <td>{{ "%.2f"|format(data.hdl) if data.hdl }}</td>
+                                <td>{{ "%.2f"|format(data.ldl) if data.ldl }}</td>
+                                <td>{{ "%.2f"|format(data.triglycerides) if data.triglycerides }}</td>
+                                <td>{{ "%.2f"|format(data.tsh) if data.tsh }}</td>
+                                <td>{{ "%.2f"|format(data.psa) if data.psa }}</td>
+                                <td>{{ data.alt }}</td>
+                                <td>{{ data.ast }}</td>
+                                <td>{{ "%.1f"|format(data.fer) if data.fer }}</td>
+                                <td>{{ "%.1f"|format(data.vitamine_d) if data.vitamine_d }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </form>
     {% else %}
-    <p style="font-size: 16px; text-align: center;">Aucune analyse sanguine connue pour {{ patient.first_name }} {{ patient.last_name }} ✌️</p>
+        <p style="font-size: 16px; text-align: center;">Aucune analyse sanguine connue pour {{ patient.first_name }} {{ patient.last_name }} ✌️</p>
     {% endif %}
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Activation des tooltips Bootstrap
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
-        });
+<script>
+// Activation des popovers Bootstrap
+document.addEventListener('DOMContentLoaded', function() {
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl)
     });
-    </script>
+
+    // Gestion de la case "Tout sélectionner"
+    const selectAllCheckbox = document.getElementById('selectAll');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('input[name="selected_reports"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+        });
+    }
+});
+</script>
 </main>
 {% endblock main %}
