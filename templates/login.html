@@ -2,17 +2,163 @@
 
 {% extends 'base.html' %}
 {% block main %}
-<main>
-    <h2>Login</h2>
-    <div>
-        <form method="POST" action="{{ url_for('login') }}">
-            <input type="text" placeholder="Username" name="username" value="{{request.form.username }}">
-            <input type="password" placeholder="Password" name="password" value="{{request.form.password }}">
-            <input type="submit" value="Login">
-        </form>
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h5 mb-0">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                        Connexion
+                    </h2>
+                </div>
+
+                <div class="card-body">
+                    {% if error %}
+                    <div class="alert alert-danger d-flex align-items-center" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <div>
+                            <strong>Erreur:</strong> {{ error }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST"
+                          action="{{ url_for('login') }}"
+                          class="needs-validation"
+                          novalidate>
+
+                        <div class="mb-3">
+                            <label for="username" class="form-label">
+                                <i class="bi bi-person-fill me-2"></i>
+                                Nom d'utilisateur
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="username"
+                                   name="username"
+                                   value="{{request.form.username }}"
+                                   placeholder="Entrez votre nom d'utilisateur"
+                                   required>
+                            <div class="invalid-feedback">
+                                Veuillez entrer votre nom d'utilisateur
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="password" class="form-label">
+                                <i class="bi bi-lock-fill me-2"></i>
+                                Mot de passe
+                            </label>
+                            <div class="input-group">
+                                <input type="password"
+                                       class="form-control"
+                                       id="password"
+                                       name="password"
+                                       value="{{request.form.password }}"
+                                       placeholder="Entrez votre mot de passe"
+                                       required>
+                                <button class="btn btn-outline-secondary"
+                                        type="button"
+                                        onclick="togglePassword()">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback">
+                                Veuillez entrer votre mot de passe
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>
+                                Se connecter
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="mt-4 text-center">
+                        <p class="mb-2">
+                            Pas encore de compte ?
+                            <a href="{{ url_for('register') }}" class="text-decoration-none">
+                                <i class="bi bi-person-plus"></i>
+                                S'inscrire
+                            </a>
+                        </p>
+                        <p class="mb-0">
+                            Mot de passe oublié ?
+                            <a href="{{ url_for('request_reset_password') }}" class="text-decoration-none">
+                                <i class="bi bi-key"></i>
+                                Réinitialiser
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    {% if error %}<p class="error"><strong>Error:</strong> {{ error }} {% endif %}
-    <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a>.</p>
-    <p>Lost password?<a href="{{ url_for('request_reset_password') }}">Click here</a>.</p>
-</main>
+</div>
+
+<script>
+// Fonction pour afficher/masquer le mot de passe
+function togglePassword() {
+    const input = document.getElementById('password');
+    const button = input.nextElementSibling;
+    const icon = button.querySelector('i');
+
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    }
+}
+
+// Validation du formulaire
+(function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms).forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+            form.classList.add('was-validated')
+        }, false)
+    })
+})()
+</script>
+
+<style>
+.card {
+    border: none;
+    border-radius: 0.5rem;
+}
+
+.card-header {
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.btn-outline-secondary:focus {
+    box-shadow: none;
+}
+
+/* Animation sur les liens */
+a {
+    transition: color 0.2s ease-in-out;
+}
+
+a:hover {
+    color: var(--bs-primary) !important;
+}
+</style>
 {% endblock main %}

@@ -2,19 +2,214 @@
 
 {% extends 'base.html' %}
 {% block main %}
-<main>
-    <h2>Register</h2>
-    <div>
-        <form method="POST" action="{{ url_for('register') }}">
-            <input type="text" placeholder="Username" name="username" value="{{ request.form.username }}">
-            <input type="password" placeholder="Password" name="password" value="{{ request.form.password }}">
-            <input type="password" placeholder="Password" name="confirm_password" value="{{ request.form.confirm_password }}">
-            <input type="email" placeholder="E-Mail" name="email" value="{{ request.form.email }}">
-            <input type="submit" value="Register">
-        </form>
-    </div>
-    {% if error %}<p class="error"><strong>Error:</strong> {{ error }} {% endif %}
-    <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a>.</p>
-</main>
-{% endblock main %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h5 mb-0">
+                        <i class="bi bi-person-plus-fill me-2"></i>
+                        Inscription
+                    </h2>
+                </div>
 
+                <div class="card-body">
+                    {% if error %}
+                    <div class="alert alert-danger d-flex align-items-center" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <div>
+                            <strong>Erreur:</strong> {{ error }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST"
+                          action="{{ url_for('register') }}"
+                          class="needs-validation"
+                          novalidate>
+
+                        <!-- Nom d'utilisateur -->
+                        <div class="mb-3">
+                            <label for="username" class="form-label">
+                                <i class="bi bi-person-fill me-2"></i>
+                                Nom d'utilisateur
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="username"
+                                   name="username"
+                                   value="{{ request.form.username }}"
+                                   placeholder="Choisissez un nom d'utilisateur"
+                                   required>
+                            <div class="invalid-feedback">
+                                Veuillez choisir un nom d'utilisateur
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label">
+                                <i class="bi bi-envelope-fill me-2"></i>
+                                Adresse email
+                            </label>
+                            <input type="email"
+                                   class="form-control"
+                                   id="email"
+                                   name="email"
+                                   value="{{ request.form.email }}"
+                                   placeholder="Entrez votre adresse email"
+                                   required>
+                            <div class="invalid-feedback">
+                                Veuillez entrer une adresse email valide
+                            </div>
+                        </div>
+
+                        <!-- Mot de passe -->
+                        <div class="mb-3">
+                            <label for="password" class="form-label">
+                                <i class="bi bi-lock-fill me-2"></i>
+                                Mot de passe
+                            </label>
+                            <div class="input-group">
+                                <input type="password"
+                                       class="form-control"
+                                       id="password"
+                                       name="password"
+                                       value="{{ request.form.password }}"
+                                       placeholder="Choisissez un mot de passe"
+                                       required
+                                       minlength="8">
+                                <button class="btn btn-outline-secondary"
+                                        type="button"
+                                        onclick="togglePassword('password')">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">
+                                Le mot de passe doit contenir au moins 8 caractères
+                            </div>
+                        </div>
+
+                        <!-- Confirmation mot de passe -->
+                        <div class="mb-4">
+                            <label for="confirm_password" class="form-label">
+                                <i class="bi bi-lock-fill me-2"></i>
+                                Confirmation du mot de passe
+                            </label>
+                            <div class="input-group">
+                                <input type="password"
+                                       class="form-control"
+                                       id="confirm_password"
+                                       name="confirm_password"
+                                       value="{{ request.form.confirm_password }}"
+                                       placeholder="Confirmez votre mot de passe"
+                                       required
+                                       minlength="8">
+                                <button class="btn btn-outline-secondary"
+                                        type="button"
+                                        onclick="togglePassword('confirm_password')">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Bouton d'inscription -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-person-plus-fill me-2"></i>
+                                S'inscrire
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Lien de connexion -->
+                    <div class="mt-4 text-center">
+                        <p class="mb-0">
+                            Déjà inscrit ?
+                            <a href="{{ url_for('login') }}" class="text-decoration-none">
+                                <i class="bi bi-box-arrow-in-right"></i>
+                                Se connecter
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Fonction pour afficher/masquer le mot de passe
+function togglePassword(inputId) {
+    const input = document.getElementById(inputId);
+    const button = input.nextElementSibling;
+    const icon = button.querySelector('i');
+
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    }
+}
+
+// Validation du formulaire
+(function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms).forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+
+            // Vérification que les mots de passe correspondent
+            const password = document.getElementById('password');
+            const confirm = document.getElementById('confirm_password');
+
+            if (password.value !== confirm.value) {
+                event.preventDefault();
+                confirm.setCustomValidity('Les mots de passe ne correspondent pas');
+            } else {
+                confirm.setCustomValidity('');
+            }
+
+            form.classList.add('was-validated')
+        }, false)
+    })
+})()
+</script>
+
+<style>
+.card {
+    border: none;
+    border-radius: 0.5rem;
+}
+
+.card-header {
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.btn-outline-secondary:focus {
+    box-shadow: none;
+}
+
+/* Animation sur les liens */
+a {
+    transition: color 0.2s ease-in-out;
+}
+
+a:hover {
+    color: var(--bs-primary) !important;
+}
+</style>
+{% endblock main %}

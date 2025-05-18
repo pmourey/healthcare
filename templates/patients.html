@@ -19,15 +19,17 @@
             <tbody>
                 {% for patient in patients %}
                 <tr>
-                    <td>
+                    <td class="position-relative"> <!-- Ajout de position-relative ici -->
                         <div class="dropdown">
-                            <button class="btn btn-outline-primary btn-sm dropdown-toggle"
-                                    data-bs-toggle="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle"
+                                    type="button"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false">
                                 Actions
                             </button>
-                            <ul class="dropdown-menu">
+                            <ul class="dropdown-menu"> <!-- Suppression de style="position: fixed" -->
                                 <li><a class="dropdown-item" href="{{ url_for('show_health_data', id=patient.id) }}">
-                                    <i class="bi bi-journal-medical"></i> Visites
+                                    <i class="bi bi-journal-medical me-2"></i> Visites
                                 </a></li>
                                 <li><a class="dropdown-item" href="{{ url_for('show_blood_data', id=patient.id) }}">
                                     <i class="bi bi-droplet"></i> Analyses
@@ -69,4 +71,85 @@
     </div>
     {% endif %}
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gérer le positionnement des menus déroulants
+    const dropdownButtons = document.querySelectorAll('.dropdown-toggle');
+
+    dropdownButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const dropdownMenu = this.nextElementSibling;
+            const buttonRect = this.getBoundingClientRect();
+
+            // Positionner le menu sous le bouton
+            dropdownMenu.style.top = `${buttonRect.bottom}px`;
+            dropdownMenu.style.left = `${buttonRect.left}px`;
+            dropdownMenu.style.minWidth = `${buttonRect.width}px`;
+        });
+    });
+
+    // Fermer les menus lors du défilement
+    document.addEventListener('scroll', function() {
+        const openMenus = document.querySelectorAll('.dropdown-menu.show');
+        openMenus.forEach(menu => {
+            const dropdown = bootstrap.Dropdown.getInstance(menu.previousElementSibling);
+            if (dropdown) {
+                dropdown.hide();
+            }
+        });
+    });
+});
+</script>
+
+<style>
+/* Styles essentiels pour le dropdown dans le tableau */
+.table td {
+    position: relative !important;
+}
+
+.dropdown {
+    position: relative !important;
+}
+
+.dropdown-menu {
+    position: absolute !important;
+    transform: none !important;
+    top: 100% !important;
+    left: 0 !important;
+    margin-top: 0 !important;
+    z-index: 1021 !important;
+}
+
+/* Assurer que les conteneurs ne masquent pas le dropdown */
+.table-responsive,
+.table-container,
+.container-fluid,
+.container,
+.row,
+.col {
+    overflow: visible !important;
+}
+
+/* Style optionnel pour améliorer l'apparence */
+.dropdown-menu {
+    min-width: 200px;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 0.375rem;
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(0,0,0,.05);
+}
+</style>
+
+
 {% endblock main %}
