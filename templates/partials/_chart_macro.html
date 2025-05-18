@@ -1,0 +1,17 @@
+{% macro render_chart(chart_type, marker_id, marker_info, dates) %}
+<div class="col-md-6 mb-4">
+    <div class="card">
+        <div class="card-body">
+            <canvas id="{{ chart_type }}_{{ marker_id }}_chart"></canvas>
+        </div>
+    </div>
+</div>
+<script>
+    initializeChart(
+        '{{ chart_type }}',
+        '{{ marker_id }}',
+        {{ marker_info|tojson }},
+        {{ dates|tojson }}
+    );
+</script>
+{% endmacro %}

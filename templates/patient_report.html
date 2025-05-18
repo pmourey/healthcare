@@ -1,111 +1,41 @@
 {% extends 'base.html' %}
 {% include './partials/_menu.html' %}
+{% from "partials/_chart_macro.html" import render_chart %}
 
 {% block main %}
+<!-- Ajoutez Chart.js et votre fichier de configuration -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/chart-config.js') }}"></script>
 
 <div class="container mt-4">
     <h2>Rapport du patient</h2>
+
+    <!-- Debug info -->
+    <script>
+        console.log('Health Data:', {{ health_data|tojson|safe }});
+        console.log('Blood Data:', {{ blood_data|tojson|safe }});
+    </script>
 
     <!-- Graphiques des données de santé -->
     {% if health_data.markers %}
         <div class="row">
             {% for marker_id, marker_info in health_data.markers.items() %}
                 {% if marker_info['values'] and marker_info['values']|length > 0 %}
-                    <div class="col-md-6 mb-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <canvas id="health_{{ marker_id }}_chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    <script>
-                        const ctx_{{ marker_id }} = document.getElementById('health_{{ marker_id }}_chart');
-                        new Chart(ctx_{{ marker_id }}, {
-                            type: 'line',
-                            data: {
-                                labels: {{ health_data.dates|tojson}},
-                                datasets: [{
-                                    label: '{{ marker_info.display_name }} ({{ marker_info.unit }})',
-                                    data: {{ marker_info['values'] }},
-                                    borderColor: 'rgb(75, 192, 192)',
-                                    tension: 0.1,
-                                    fill: false
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                plugins: {
-                                    title: {
-                                        display: true,
-                                        text: '{{ marker_info.display_name }}'
-                                    }
-                                },
-                                scales: {
-                                    y: {
-                                        title: {
-                                            display: true,
-                                            text: '{{ marker_info.unit }}'
-                                        }
-                                    }
-                                }
-                            }
-                        });
-                    </script>
+                    {{ render_chart('health', marker_id, marker_info, health_data.dates) }}
                 {% endif %}
             {% endfor %}
         </div>
     {% endif %}
 
-    <!-- Même structure pour les données sanguines -->
+    <!-- Données sanguines -->
     {% if blood_data.markers %}
         <div class="row">
             {% for marker_id, marker_info in blood_data.markers.items() %}
-                {% if marker_info['values'] and marker_info['values']|length > 0  %}
-                    <div class="col-md-6 mb-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <canvas id="blood_{{ marker_id }}_chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    <script>
-                        const ctx_{{ marker_id }} = document.getElementById('blood_{{ marker_id }}_chart');
-                        new Chart(ctx_{{ marker_id }}, {
-                            type: 'line',
-                            data: {
-                                labels: {{ blood_data.dates|tojson}},
-                                datasets: [{
-                                    label: '{{ marker_info.display_name }} ({{ marker_info.unit }})',
-                                    data: {{ marker_info['values'] }},
-                                    borderColor: 'rgb(75, 192, 192)',
-                                    tension: 0.1,
-                                    fill: false
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                plugins: {
-                                    title: {
-                                        display: true,
-                                        text: '{{ marker_info.display_name }}'
-                                    }
-                                },
-                                scales: {
-                                    y: {
-                                        title: {
-                                            display: true,
-                                            text: '{{ marker_info.unit }}'
-                                        }
-                                    }
-                                }
-                            }
-                        });
-                    </script>
+                {% if marker_info['values'] and marker_info['values']|length > 0 %}
+                    {{ render_chart('blood', marker_id, marker_info, blood_data.dates) }}
                 {% endif %}
             {% endfor %}
         </div>
     {% endif %}
 </div>
-
 {% endblock %}

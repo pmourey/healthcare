@@ -21,7 +21,7 @@ from pytz import timezone
 from sqlalchemy import desc
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from Controller import get_user_by_id, check, send_confirmation_email, send_password_recovery_email, get_session_by_login, create_user, validate_password_complexity
+from Controller import get_user_by_id, check, send_confirmation_email, send_password_recovery_email, get_session_by_login, validate_password_complexity
 from Model import User, db, Session, Patient, HealthData, AnalyseSanguine
 
 import secrets
@@ -43,6 +43,7 @@ app.secret_key = secrets.token_bytes(32).hex()
 app.serializer = URLSafeSerializer(app.secret_key)
 # Config
 app.config.from_object('config.Config')
+app.config.from_object('config.Medical')
 # Initialize extensions
 db.init_app(app)
 # migrate.init_app(app, db)
@@ -77,6 +78,7 @@ def get_client_ip():
 		client_ip = request.remote_addr
 	return client_ip
 
+
 @csrf.exempt
 @app.route('/')
 def welcome():
@@ -100,6 +102,7 @@ def welcome():
 		browser_info = f"Family = {user_agent.browser.family}, Version = {user_agent.browser.version_string}"
 		app.logger.debug(f"Client IP: {client_ip}, Browser: ({browser_info})")
 	return render_template('index.html', session=session, user=user, token=token)
+
 
 @csrf.exempt
 @app.route("/register", methods=['GET', 'POST'])
@@ -125,9 +128,12 @@ def register():
 				error = f'email {email} is invalid! Please check syntax.'
 			else:
 				try:
-					user = create_user(username, password, email)  # Add code to save user to database
-					# user = User(username=username, password=password, creation_date=datetime.now(), email=email)
-					# logging.warning("See this message in Flask Debug Toolbar!")
+					is_valid, message = validate_password_complexity(password)
+					if not is_valid:
+						raise ValueError(f"Password validation failed!")
+					# Continuer le traitement si le mot de passe est valide
+					hashed_password = generate_password_hash(password)
+					user = User(username=username, password=hashed_password, creation_date=datetime.now(), email=email)
 					db.session.add(user)
 					db.session.commit()
 					s = Serializer(app.config['SECRET_KEY'])
@@ -241,6 +247,7 @@ def request_reset_password():
 
 	return render_template('request_reset_password.html')
 
+
 @app.route('/validate_email/<token>', methods=['GET', 'POST'])
 def validate_email(token):
 	error: str = None
@@ -352,6 +359,7 @@ def show_accounts():
 	# Reverse order query
 	accounts = User.query.order_by(desc(User.id)).all()
 	return render_template('accounts.html', accounts=accounts, user=user)
+
 
 @csrf.exempt
 @app.route('/update_account/<int:id>', methods=['GET', 'POST'])
@@ -660,11 +668,13 @@ def send_report_email():
 	except Exception as e:
 		return jsonify({'success': False, 'error': str(e)})
 
+
 @app.route('/select_markers/<int:id>')
 @is_connected
 def select_markers(id):
 	patient = Patient.query.get_or_404(id)
 	return render_template('select_markers.html', patient=patient)
+
 
 @csrf.exempt
 @app.route('/generate_graphs', methods=['POST'])
@@ -677,7 +687,6 @@ def generate_graphs():
 	# Récupération des données
 	health_data = HealthData.query.filter_by(patient_id=patient.id).order_by(HealthData.creation_date).all()
 	blood_data = AnalyseSanguine.query.filter_by(patient_id=patient.id).order_by(AnalyseSanguine.date_analyse).all()
-
 
 	# Dictionnaires pour stocker les données sélectionnées
 	selected_health_data = {'dates': [data.creation_date.strftime('%d/%m/%Y') for data in health_data], 'markers': {}}
@@ -703,15 +712,14 @@ def generate_graphs():
 				try:
 					val = getattr(data, attr_name)
 					# Convertir en float si possible, sinon None
-					values.append(float(val))
-					# values.append(float(val) if val is not None else None)
+					values.append(float(val))  # values.append(float(val) if val is not None else None)
 				except (ValueError, TypeError, AttributeError):
 					# values.append(None)
 					continue  # Ignore les valeurs problématiques
 
 			# Ne crée l'entrée que si des valeurs existent
 			if values:  # Vérifie si la liste n'est pas vide
-				selected_health_data['markers'][marker] = {'values': values, 'display_name': display_name, 'unit': marker_units.get(marker, '')}
+				selected_health_data['markers'][marker] = {'values': values, 'display_name': display_name, 'unit': marker_units.get(marker, ''), 'limits': {'min': app.config['LIMITS'][marker]['min'], 'max': app.config['LIMITS'][marker]['max']}}
 
 	app.logger.debug(f'selected_health_data: {selected_health_data}')
 
@@ -729,24 +737,13 @@ def generate_graphs():
 					continue
 
 			if values:
-				selected_blood_data['markers'][marker] = {
-					'values': values,
-					'display_name': display_name,
-					'unit': marker_units.get(marker, '')
-				}
+				selected_blood_data['markers'][marker] = {'values': values, 'display_name': display_name, 'unit': marker_units.get(marker, ''), 'limits': {'min': app.config['LIMITS'][marker]['min'], 'max': app.config['LIMITS'][marker]['max']}}
 
 	app.logger.debug(f'selected_blood_data: {selected_blood_data}')
 
 	# Conversion des données en format JSON-compatible
-	return render_template(
-		'patient_report.html',
-		patient=patient,
-		today=datetime.now().strftime('%d/%m/%Y'),
-		health_data=selected_health_data,
-		blood_data=selected_blood_data,
-		selected_health_markers=health_markers,
-		selected_blood_markers=blood_markers
-	)
+	return render_template('patient_report.html', patient=patient, today=datetime.now().strftime('%d/%m/%Y'), health_data=selected_health_data, blood_data=selected_blood_data, selected_health_markers=health_markers, selected_blood_markers=blood_markers)
+
 
 def generate_graphs_ori():
 	patient = Patient.query.get_or_404(request.form.get('patient_id'))
@@ -806,7 +803,7 @@ def generate_graphs_ori():
 			selected_blood_data['markers'][marker] = {'values': values, 'display_name': display_name, 'unit': marker_units.get(marker, '')}
 
 	return render_template('patient_report.html', patient=patient, today=datetime.now(),  # Formatage de la date
-		health_data=selected_health_data, blood_data=selected_blood_data, selected_health_markers=health_markers, selected_blood_markers=blood_markers)
+						   health_data=selected_health_data, blood_data=selected_blood_data, selected_health_markers=health_markers, selected_blood_markers=blood_markers)
 
 
 @app.before_request
