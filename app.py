@@ -694,13 +694,13 @@ def generate_graphs():
 	selected_blood_data = {'dates': [data.date_analyse.strftime('%d/%m/%Y') for data in blood_data], 'markers': {}}
 
 	# Mapping des marqueurs de santé selon le template
-	health_marker_mapping = {'weight': ('weight', 'Poids'), 'height': ('height', 'Taille'), 'temperature': ('temperature', 'Température'), 'systolic_bp': ('blood_pressure_sys', 'Tension systolique'), 'diastolic_bp': ('blood_pressure_dia', 'Tension diastolique'), 'heart_rate': ('heart_rate', 'Fréquence cardiaque')}
+	health_marker_mapping = {'weight': ('weight', 'Poids'), 'height': ('height', 'Taille'), 'imc': ('imc', 'IMC'), 'temperature': ('temperature', 'Température'), 'systolic_bp': ('blood_pressure_sys', 'Tension systolique'), 'diastolic_bp': ('blood_pressure_dia', 'Tension diastolique'), 'heart_rate': ('heart_rate', 'Fréquence cardiaque')}
 
 	# Mapping des marqueurs sanguins selon le template
-	blood_marker_mapping = {'hemoglobine': ('hemoglobine', 'Hémoglobine'), 'hematocrite': ('hematocrite', 'Hématocrite'), 'globules_blancs': ('globules_blancs', 'Globules blancs'), 'globules_rouges': ('globules_rouges', 'Globules rouges'), 'plaquettes': ('plaquettes', 'Plaquettes'), 'creatinine': ('creatinine', 'Créatinine'), 'uree': ('uree', 'Urée'), 'glycemie': ('glycemie', 'Glycémie'), 'cholesterol_total': ('cholesterol_total', 'Cholestérol total'), 'hdl': ('hdl', 'HDL'), 'ldl': ('ldl', 'LDL'), 'triglycerides': ('triglycerides', 'Triglycérides'), 'tsh': ('tsh', 'TSH'), 'psa': ('psa', 'PSA'), 'alt': ('alt', 'ALT'), 'ast': ('ast', 'AST'), 'fer': ('fer', 'Fer'), 'vitamine_d': ('vitamine_d', 'Vitamine D')}
+	blood_marker_mapping = {'hemoglobine': ('hemoglobine', 'Hémoglobine'), 'hematocrite': ('hematocrite', 'Hématocrite'), 'globules_blancs': ('globules_blancs', 'Globules blancs'), 'globules_rouges': ('globules_rouges', 'Globules rouges'), 'plaquettes': ('plaquettes', 'Plaquettes'), 'creatinine': ('creatinine', 'Créatinine'), 'uree': ('uree', 'Urée (Acide urique)'), 'glycemie': ('glycemie', 'Glycémie'), 'cholesterol_total': ('cholesterol_total', 'Cholestérol total'), 'hdl': ('hdl', 'HDL'), 'ldl': ('ldl', 'LDL'), 'triglycerides': ('triglycerides', 'Triglycérides'), 'tsh': ('tsh', 'TSH'), 'psa': ('psa', 'PSA'), 'alt': ('alt', 'ALT (Transaminases SGPT)'), 'ast': ('ast', 'AST (Transaminases SGOT)'), 'fer': ('fer', 'Fer'), 'vitamine_d': ('vitamine_d', 'Vitamine D')}
 
 	# Unités pour chaque marqueur
-	marker_units = {'weight': 'kg', 'height': 'cm', 'temperature': '°C', 'systolic_bp': 'mmHg', 'diastolic_bp': 'mmHg', 'heart_rate': 'bpm', 'hemoglobine': 'g/dL', 'hematocrite': '%', 'globules_blancs': '/mm³', 'globules_rouges': '/mm³', 'plaquettes': '/mm³', 'creatinine': 'mg/L', 'uree': 'mg/L', 'glycemie': 'g/L', 'cholesterol_total': 'g/L', 'hdl': 'g/L', 'ldl': 'g/L', 'triglycerides': 'g/L', 'tsh': 'mUI/L', 'psa': 'ng/mL', 'alt': 'UI/L', 'ast': 'UI/L', 'fer': 'µg/dL', 'vitamine_d': 'ng/mL'}
+	marker_units = {'weight': 'kg', 'height': 'cm', 'imc': 'kg/m2', 'temperature': '°C', 'systolic_bp': 'mmHg', 'diastolic_bp': 'mmHg', 'heart_rate': 'bpm', 'hemoglobine': 'g/dL', 'hematocrite': '%', 'globules_blancs': '/mm³', 'globules_rouges': '/mm³', 'plaquettes': '/mm³', 'creatinine': 'mg/L', 'uree': 'mg/L', 'glycemie': 'g/L', 'cholesterol_total': 'g/L', 'hdl': 'g/L', 'ldl': 'g/L', 'triglycerides': 'g/L', 'tsh': 'mUI/L', 'psa': 'ng/mL', 'alt': 'UI/L', 'ast': 'UI/L', 'fer': 'µg/dL', 'vitamine_d': 'ng/mL'}
 
 	# Récupération des données de santé sélectionnées
 	for marker in health_markers:
@@ -710,7 +710,10 @@ def generate_graphs():
 			values = []
 			for data in health_data:
 				try:
-					val = getattr(data, attr_name)
+					if attr_name == 'imc':
+						val = data.imc  # Utilise la propriété imc
+					else:
+						val = getattr(data, attr_name)
 					# Convertir en float si possible, sinon None
 					values.append(float(val))  # values.append(float(val) if val is not None else None)
 				except (ValueError, TypeError, AttributeError):

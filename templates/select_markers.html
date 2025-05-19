@@ -6,7 +6,7 @@
 {% block main %}
 <main>
     <h2>Sélection marqueurs</h2>
-    <script src="{{ url_for('static', filename='js/patient_report.js') }}"></script>
+<!--    <script src="{{ url_for('static', filename='js/patient_report.js') }}"></script>-->
         <form action="{{ url_for('generate_graphs') }}" method="post">
             <!-- Ajout du champ caché pour l'ID du patient -->
             <input type="hidden" name="patient_id" value="{{ patient.id }}">
@@ -40,6 +40,7 @@
                                     {% set health_markers = [
                                         ('weight', 'Poids (kg)'),
                                         ('height', 'Taille (cm)'),
+                                        ('imc', 'IMC (kg/m2)'),
                                         ('temperature', 'Température (°C)'),
                                         ('systolic_bp', 'Tension systolique'),
                                         ('diastolic_bp', 'Tension diastolique'),

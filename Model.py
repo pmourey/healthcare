@@ -38,6 +38,10 @@ class HealthData(db.Model):
 	# Define a foreign key column referencing the 'patient' table
 	patient_id = Column(Integer, ForeignKey('patients.id'), nullable=False)
 
+	@property
+	def imc(self) -> float:
+		return round(self.weight / ((self.height / 100) ** 2), 1)
+
 class Patient(db.Model):
 	__tablename__ = 'patients'
 	id = Column(Integer, primary_key=True)
