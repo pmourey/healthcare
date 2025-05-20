@@ -103,6 +103,7 @@ def welcome():
 		app.logger.debug(f"Client IP: {client_ip}, Browser: ({browser_info})")
 	return render_template('index.html', session=session, user=user, token=token)
 
+
 @csrf.exempt
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -158,6 +159,7 @@ def register():
 					# Handle the error appropriately (e.g., return to form with error message)
 					error = str(e)
 	return render_template('register.html', error=error)
+
 
 @csrf.exempt
 @app.route("/login", methods=['GET', 'POST'])
@@ -367,6 +369,21 @@ def show_accounts():
 	# Reverse order query
 	accounts = User.query.order_by(desc(User.id)).all()
 	return render_template('accounts.html', accounts=accounts, user=user)
+
+
+@csrf.exempt
+@app.route('/delete_account/<int:id>', methods=['GET', 'POST'])
+@is_connected
+@is_admin
+def delete_account(id):
+	app.logger.debug(f'Delete user #{id}')
+	if request.method == 'GET':
+		user = User.query.get_or_404(id)
+		app.logger.debug(f'User debug: {user}')
+		db.session.delete(user)
+		db.session.commit()
+		flash(f'User \"{user.username}\" has been deleted!')
+		return redirect(url_for('show_accounts'))
 
 
 @csrf.exempt
