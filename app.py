@@ -90,7 +90,7 @@ def welcome():
 		s = Serializer(app.config['SECRET_KEY'])
 		token = s.dumps({'user_id': user.id})
 		# Mettez à jour le modèle d'utilisateur avec le jeton et le délai d'expiration
-		# user.recovery_token = generate_password_hash(token, method='sha256')
+		# user.recovery_token = generate_password_hash(token, method='pbkdf2:sha256')
 		user.recovery_token = generate_password_hash(token)
 		user.token_expiration = datetime.now() + timedelta(hours=24)
 		db.session.commit()
@@ -102,7 +102,6 @@ def welcome():
 		browser_info = f"Family = {user_agent.browser.family}, Version = {user_agent.browser.version_string}"
 		app.logger.debug(f"Client IP: {client_ip}, Browser: ({browser_info})")
 	return render_template('index.html', session=session, user=user, token=token)
-
 
 @csrf.exempt
 @app.route("/register", methods=['GET', 'POST'])
@@ -131,9 +130,10 @@ def register():
 					is_valid, message = validate_password_complexity(password)
 					if not is_valid:
 						raise ValueError(f"Password validation failed!")
+
 					# Continuer le traitement si le mot de passe est valide
-					hashed_password = generate_password_hash(password)
-					user = User(username=username, password=hashed_password, creation_date=datetime.now(), email=email)
+					user = User(username=username, password=password, creation_date=datetime.now(), email=email)
+
 					db.session.add(user)
 					db.session.commit()
 					s = Serializer(app.config['SECRET_KEY'])
@@ -141,7 +141,7 @@ def register():
 					token = s.dumps({'user_id': user.id})
 
 					# Mettez à jour le modèle d'utilisateur avec le jeton et le délai d'expiration
-					# user.recovery_token = generate_password_hash(token, method='sha256')
+					# user.recovery_token = generate_password_hash(token, method='pbkdf2:sha256')
 					user.recovery_token = generate_password_hash(token)
 					user.token_expiration = datetime.now() + timedelta(minutes=10)
 					# app.logger.debug(f'time zone info: {user.token_expiration.tzinfo}')
@@ -159,7 +159,6 @@ def register():
 					error = str(e)
 	return render_template('register.html', error=error)
 
-
 @csrf.exempt
 @app.route("/login", methods=['GET', 'POST'])
 def login():
@@ -167,8 +166,14 @@ def login():
 	error = None
 	if request.method == 'POST':
 		user = User.query.filter_by(username=request.form['username']).first()
-		app.logger.debug(f'user = {user} - clear pwd = {request.form["password"]}')
-		if user and check_password_hash(user.password, password=request.form['password']):
+		app.logger.debug(f'user = {user.username} - clear pwd = {request.form["password"]}')
+		is_pass_ok = check_password_hash(user.password, request.form["password"])
+		app.logger.debug(f'user (login) = {user.username} - is_pass_ok = {is_pass_ok}')
+
+		password_attempt = request.form["password"]
+		stored_hash = user.password
+
+		if user and check_password_hash(stored_hash, password_attempt):
 			if user.validated:
 				session['login_id'] = user.id
 				app.logger.debug(f'user (login) = {user.username} - id = {user.id} - session: {session}')
@@ -204,7 +209,8 @@ def change_password():
 				is_valid, error_message = validate_password_complexity(new_password)
 				if not is_valid:
 					raise ValueError(error_message)
-				user.password = generate_password_hash(new_password, method='sha256')
+				# user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
+				user.password = generate_password_hash(new_password)
 				db.session.add(user)
 				db.session.commit()
 				flash('Password was successfully changed!')
@@ -229,7 +235,7 @@ def request_reset_password():
 			token = s.dumps({'user_id': user.id})
 
 			# Mettez à jour le modèle d'utilisateur avec le jeton et le délai d'expiration
-			# user.recovery_token = generate_password_hash(token, method='sha256')
+			# user.recovery_token = generate_password_hash(token, method='pbkdf2:sha256')
 			user.recovery_token = generate_password_hash(token)
 			user.token_expiration = datetime.now() + timedelta(minutes=10)
 
@@ -240,6 +246,7 @@ def request_reset_password():
 
 			flash('Un e-mail de récupération de mot de passe a été envoyé.', 'success')
 			reset_link = url_for('reset_password', token=token, _external=True)
+			app.logger.debug(f'reset_link = {reset_link}')
 			send_password_recovery_email(app=app, reset_link=reset_link, user=user, author=app.config['GMAIL_FULLNAME'])
 			return redirect(url_for('login'))
 
@@ -255,6 +262,7 @@ def validate_email(token):
 	s = Serializer(app.config['SECRET_KEY'])
 	try:
 		data = s.loads(token)
+		app.logger.debug(f'data = {data}')
 		user = User.query.get_or_404(data['user_id'])
 		# Calculate the time difference
 		remaining_minutes = int((user.token_expiration - datetime.now()).total_seconds() / 60)
@@ -316,7 +324,7 @@ def reset_password(token):
 				if not is_valid:
 					raise ValueError(error_message)
 				# Mettre à jour le mot de passe de l'utilisateur
-				# user.password = generate_password_hash(new_password, method='sha256')
+				# user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
 				user.password = generate_password_hash(new_password)
 
 				# Réinitialiser le champ de récupération de mot de passe
