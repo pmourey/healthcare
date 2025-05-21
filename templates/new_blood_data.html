@@ -6,7 +6,7 @@
 
 {% block main %}
 <main>
-    <div class="container py-4">
+    <div class="container-fluid py-4">
         <h2 class="mb-4">Analyses sanguines - {{ patient.first_name }} {{ patient.last_name }}</h2>
 
         <div class="row">
@@ -23,48 +23,84 @@
                         <!-- Première colonne -->
                         <div class="col-md-6">
                             <div class="mb-3">
+                                    <label class="form-label mb-0">Hémoglobine</label>
+                                    <small class="text-muted">
+                                        ({{ limits['hemoglobine']['min'] }}-{{ limits['hemoglobine']['max'] }} {{ limits['hemoglobine']['unit'] }})
+                                    </small>
                                 <input type="number" step="0.1" class="form-control"
-                                       placeholder="Hémoglobine (g/dL)" name="hemoglobine"
+                                       placeholder="Valeur" name="hemoglobine"
                                        value="{{ request.form.hemoglobine }}">
                             </div>
                             <div class="mb-3">
+                                    <label class="form-label mb-0">Hématocrite</label>
+                                    <small class="text-muted">
+                                        ({{ limits['hematocrite']['min'] }}-{{ limits['hematocrite']['max'] }} {{ limits['hematocrite']['unit'] }})
+                                    </small>
                                 <input type="number" step="0.1" class="form-control"
-                                       placeholder="Hématocrite (%)" name="hematocrite"
+                                       placeholder="Valeur" name="hematocrite"
                                        value="{{ request.form.hematocrite }}">
                             </div>
                             <div class="mb-3">
+                                    <label class="form-label mb-0">Leucocytes</label>
+                                    <small class="text-muted">
+                                        ({{ limits['globules_blancs']['min'] }}-{{ limits['globules_blancs']['max'] }} {{ limits['globules_blancs']['unit'] }})
+                                    </small>
                                 <input type="number" class="form-control"
-                                       placeholder="Leucocytes (/mm3)" name="globules_blancs"
-                                       value="{{ request.form.globules_blancs }}">
+                                       placeholder="Valeur" name="globules_blancs"
+                                       value="{{ request.form.c }}">
                             </div>
                             <div class="mb-3">
+                                    <label class="form-label mb-0">Hématies</label>
+                                    <small class="text-muted">
+                                        ({{ limits['globules_rouges']['min'] }}-{{ limits['globules_rouges']['max'] }} {{ limits['globules_rouges']['unit'] }}
+                                    </small>
                                 <input type="number" class="form-control"
-                                       placeholder="Hématies (/mm3)" name="globules_rouges"
+                                       placeholder="Valeur" name="globules_rouges"
                                        value="{{ request.form.globules_rouges }}">
                             </div>
                             <div class="mb-3">
+                                    <label class="form-label mb-0">Plaquettes</label>
+                                    <small class="text-muted">
+                                        ({{ limits['plaquettes']['min'] }}-{{ limits['plaquettes']['max'] }} {{ limits['plaquettes']['unit'] }})
+                                    </small>
                                 <input type="number" class="form-control"
-                                       placeholder="Plaquettes (/mm3)" name="plaquettes"
+                                       placeholder="Valeur" name="plaquettes"
                                        value="{{ request.form.plaquettes }}">
                             </div>
                             <div class="mb-3">
+                                    <label class="form-label mb-0">Créatinine</label>
+                                    <small class="text-muted">
+                                        ({{ limits['creatinine']['min'] }}-{{ limits['creatinine']['max'] }} {{ limits['creatinine']['unit'] }})
+                                    </small>
                                 <input type="number" step="0.1" class="form-control"
-                                       placeholder="Créatinine (mg/L)" name="creatinine"
+                                       placeholder="Valeur" name="creatinine"
                                        value="{{ request.form.creatinine }}">
                             </div>
                             <div class="mb-3">
+                                    <label class="form-label mb-0">Urée - Acide urique</label>
+                                    <small class="text-muted">
+                                        ({{ limits['uree']['min'] }}-{{ limits['uree']['max'] }} {{ limits['uree']['unit'] }})
+                                    </small>
                                 <input type="number" class="form-control"
-                                       placeholder="Urée - Acide urique (mg/L)" name="uree"
+                                       placeholder="Valeur" name="uree"
                                        value="{{ request.form.uree }}">
                             </div>
                             <div class="mb-3">
+                                    <label class="form-label mb-0">Glycémie</label>
+                                    <small class="text-muted">
+                                        ({{ limits['glycemie']['min'] }}-{{ limits['glycemie']['max'] }} {{ limits['glycemie']['unit'] }})
+                                    </small>
                                 <input type="number" step="0.01" class="form-control"
-                                       placeholder="Glycémie (g/L)" name="glycemie"
+                                       placeholder="Valeur" name="glycemie"
                                        value="{{ request.form.glycemie }}">
                             </div>
                             <div class="mb-3">
+                                    <label class="form-label mb-0">Cholestérol Total</label>
+                                    <small class="text-muted">
+                                        ({{ limits['cholesterol_total']['min'] }}-{{ limits['cholesterol_total']['max'] }} {{ limits['cholesterol_total']['unit'] }})
+                                    </small>
                                 <input type="number" step="0.01" class="form-control"
-                                       placeholder="Cholestérol Total (g/L)" name="cholesterol_total"
+                                       placeholder="Valeur" name="cholesterol_total"
                                        value="{{ request.form.cholesterol_total }}">
                             </div>
                         </div>
@@ -72,48 +108,85 @@
                         <!-- Deuxième colonne -->
                         <div class="col-md-6">
                             <div class="mb-3">
+                                    <label class="form-label mb-0">HDL-Cholestérol</label>
+                                    <small class="text-muted">
+                                        ({{ limits['hdl']['min'] }}-{{ limits['hdl']['max'] }} {{ limits['hdl']['unit'] }})
+                                    </small>
                                 <input type="number" step="0.01" class="form-control"
-                                       placeholder="HDL-Cholestérol (g/L)" name="hdl"
+                                       placeholder="Valeur" name="hdl"
                                        value="{{ request.form.hdl }}">
                             </div>
                             <div class="mb-3">
+                                    <label class="form-label mb-0">LDL-Cholestérol</label>
+                                    <small class="text-muted">
+                                        ({{ limits['ldl']['min'] }}-{{ limits['ldl']['max'] }} {{ limits['ldl']['unit'] }})
+                                    </small>
                                 <input type="number" step="0.01" class="form-control"
-                                       placeholder="LDL-Cholestérol (g/L)" name="ldl"
+                                       placeholder="Valeur"
+                                       name="ldl"
                                        value="{{ request.form.ldl }}">
                             </div>
                             <div class="mb-3">
+                                    <label class="form-label mb-0">Triglycérides</label>
+                                    <small class="text-muted">
+                                        ({{ limits['triglycerides']['min'] }}-{{ limits['triglycerides']['max'] }} {{ limits['triglycerides']['unit'] }})
+                                    </small>
                                 <input type="number" step="0.01" class="form-control"
-                                       placeholder="Triglycérides (g/L)" name="triglycerides"
+                                       placeholder="Valeur" name="triglycerides"
                                        value="{{ request.form.triglycerides }}">
                             </div>
                             <div class="mb-3">
+                                    <label class="form-label mb-0">TSH-Thyroïde</label>
+                                    <small class="text-muted">
+                                        ({{ limits['tsh']['min'] }}-{{ limits['tsh']['max'] }} {{ limits['tsh']['unit'] }})
+                                    </small>
                                 <input type="number" step="0.01" class="form-control"
-                                       placeholder="TSH-Thyroïde (mUI/L)" name="tsh"
+                                       placeholder="Valeur" name="tsh"
                                        value="{{ request.form.tsh }}">
                             </div>
                             <div class="mb-3">
+                                    <label class="form-label mb-0">PSA</label>
+                                    <small class="text-muted">
+                                        ({{ limits['psa']['min'] }}-{{ limits['psa']['max'] }} {{ limits['psa']['unit'] }})
+                                    </small>
                                 <input type="number" step="0.01" class="form-control"
-                                       placeholder="PSA (ng/mL)" name="psa"
+                                       placeholder="Valeur" name="psa"
                                        value="{{ request.form.psa }}">
                             </div>
                             <div class="mb-3">
+                                    <label class="form-label mb-0">ALT - SGPT</label>
+                                    <small class="text-muted">
+                                        ({{ limits['alt']['min'] }}-{{ limits['alt']['max'] }} {{ limits['alt']['unit'] }})
+                                    </small>
                                 <input type="number" class="form-control"
-                                       placeholder="ALT - SGPT (UI/L)" name="alt"
+                                       placeholder="Valeur" name="alt"
                                        value="{{ request.form.alt }}">
                             </div>
                             <div class="mb-3">
+                                    <label class="form-label mb-0">AST - SGOT</label>
+                                    <small class="text-muted">
+                                        ({{ limits['ast']['min'] }}-{{ limits['ast']['max'] }} {{ limits['ast']['unit'] }})
+                                    </small>
                                 <input type="number" class="form-control"
-                                       placeholder="AST - SGOT (UI/L)" name="ast"
+                                       placeholder="Valeur" name="ast"
                                        value="{{ request.form.ast }}">
                             </div>
                             <div class="mb-3">
+                                    <label class="form-label mb-0">Fer</label>
+                                    <small class="text-muted">
+                                        ({{ limits['fer']['min'] }}-{{ limits['fer']['max'] }} {{ limits['fer']['unit'] }})
+                                    </small>
                                 <input type="number" step="0.1" class="form-control"
-                                       placeholder="Fer (µg/dL)" name="fer"
+                                       placeholder="Valeur" name="fer"
                                        value="{{ request.form.fer }}">
                             </div>
                             <div class="mb-3">
+                                    <label class="form-label mb-0">Vitamine D</label>
+                                    <small class="text-muted">
+                                        ({{ limits['vitamine_d']['min'] }}-{{ limits['vitamine_d']['max'] }} {{ limits['vitamine_d']['unit'] }})
+                                    </small>
                                 <input type="number" step="0.1" class="form-control"
-                                       placeholder="Vitamine D (ng/mL)" name="vitamine_d"
+                                       placeholder="Valeur" name="vitamine_d"
                                        value="{{ request.form.vitamine_d }}">
                             </div>
                         </div>
@@ -133,4 +206,32 @@
         </div>
     </div>
 </main>
+<style>
+.container-fluid {
+    max-width: 1920px;
+    margin: 0 auto;
+}
+
+.form-label {
+    font-weight: 500;
+}
+
+.text-muted {
+    font-size: 0.85em;
+}
+
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 0.5rem;
+    }
+
+    .row {
+        margin: 0;
+    }
+
+    .col-md-3 {
+        padding: 0.5rem;
+    }
+}
+</style>
 {% endblock main %}

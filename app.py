@@ -555,7 +555,7 @@ def new_blood_data(id: int):
 			flash(f'Error in form: {str(e)}', 'error')
 			return render_template('new_blood_data.html', patient=patient), 400
 
-	return render_template('new_blood_data.html', patient=patient)
+	return render_template('new_blood_data.html', patient=patient, limits=app.config['LIMITS'])
 
 
 @app.route('/show_blood_data/<int:id>')
