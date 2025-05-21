@@ -1,32 +1,144 @@
-<!-- healthcare/templates/update_account.html -->
-
 {% extends 'base.html' %}
 {% block main %}
 
-<main>
-    <form action="{{ url_for('update_account', id=user.id) }}" , method="POST" , onsubmit="return confirmSubmit();">
-        <table class="update-form">
-            <tr>
-                <td><label for="role">Sélectionnez un nouveau rôle pour l'utilisateur {{ user.username }}:</label></td>
-                <td>
-                    <select id="role" name="role">
-                        <option value="Administrateur" {% if user.is_admin %} selected {% endif %} >Administrateur</option>
-                        <option value="Editeur"  {% if user.is_editor %} selected {% endif %}>Editeur</option>
-                        <option value="Lecteur" {% if user.is_reader %} selected {% endif %}>Lecteur</option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td>&nbsp;</td>
-                <td><input type="submit" value="Update"></td>
-            </tr>
-        </table>
-    </form>
-    <script>
-        function confirmSubmit() {
-            var result = confirm("Are you sure you want to submit the form?");
-            return result;
-        }
-    </script>
-</main>
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h2 class="h5 mb-0">
+                        <i class="bi bi-person-gear me-2"></i>
+                        Modification du rôle utilisateur
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('update_account', id=user.id) }}"
+                          method="POST"
+                          onsubmit="return confirmSubmit();"
+                          class="needs-validation"
+                          novalidate>
+
+                        <div class="mb-4">
+                            <label for="role" class="form-label">
+                                <i class="bi bi-shield me-2"></i>
+                                Nouveau rôle pour <strong>{{ user.username }}</strong>
+                            </label>
+                            <select id="role"
+                                    name="role"
+                                    class="form-select"
+                                    required>
+                                <option value="Administrateur"
+                                        {% if user.is_admin %} selected {% endif %}>
+                                    <i class="bi bi-shield-fill"></i>
+                                    Administrateur
+                                </option>
+                                <option value="Editeur"
+                                        {% if user.is_editor %} selected {% endif %}>
+                                    <i class="bi bi-pencil-fill"></i>
+                                    Editeur
+                                </option>
+                                <option value="Lecteur"
+                                        {% if user.is_reader %} selected {% endif %}>
+                                    <i class="bi bi-person-fill"></i>
+                                    Lecteur
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-2"></i>
+                                Mettre à jour
+                            </button>
+                            <a href="{{ url_for('show_accounts') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>
+                                Retour
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-question-circle-fill me-2"></i>
+                    Confirmation
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir modifier le rôle de cet utilisateur ?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-2"></i>
+                    Annuler
+                </button>
+                <button type="button" class="btn btn-primary" id="confirmBtn">
+                    <i class="bi bi-check-circle me-2"></i>
+                    Confirmer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmSubmit() {
+    return new Promise((resolve) => {
+        const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+
+        document.getElementById('confirmBtn').onclick = function() {
+            modal.hide();
+            resolve(true);
+        };
+
+        document.getElementById('confirmModal').addEventListener('hidden.bs.modal', function () {
+            resolve(false);
+        }, { once: true });
+
+        modal.show();
+    });
+}
+
+// Validation du formulaire
+(function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms).forEach(function (form) {
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault()
+            if (!form.checkValidity()) {
+                event.stopPropagation()
+            } else {
+                const confirmed = await confirmSubmit();
+                if (confirmed) {
+                    form.submit();
+                }
+            }
+            form.classList.add('was-validated')
+        }, false)
+    })
+})()
+</script>
+
+<style>
+.card {
+    border-radius: 0.5rem;
+}
+.modal-content {
+    border-radius: 0.5rem;
+}
+.form-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+</style>
 {% endblock main %}

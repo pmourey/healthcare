@@ -1,23 +1,123 @@
-<!-- healthcare/templates/new_patient.html -->
-
 {% extends 'base.html' %}
 {% include './partials/_menu.html' %}
 
 {% block main %}
-<main>
-    <h2>Nouveau patient</h2>
-    <div>
-        <form method="POST" action="{{ url_for('new_patient') }}">
-            <input type="text" placeholder="Firstname" name="firstname" value="{{ request.form.firstname }}">
-            <input type="text" placeholder="Lastname" name="lastname" value="{{ request.form.lastname }}">
-            <input type="email" placeholder="E-Mail" name="email" value="{{ request.form.email }}">
-            <input type="tel" placeholder="Téléphone (06 12 34 56 78)" name="phone" value="{{ request.form.phone }}"
-                   pattern="^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$"
-                   title="Veuillez entrer un numéro de téléphone valide (ex: 06 12 34 56 78 ou +33 6 12 34 56 78)"
-                   required>
-            <input type="submit" value="Create">
-        </form>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">Nouveau patient</h2>
+                </div>
+                
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('new_patient') }}" class="needs-validation" novalidate>
+                        <!-- Prénom -->
+                        <div class="mb-3">
+                            <div class="form-floating">
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="firstname"
+                                       name="firstname" 
+                                       placeholder="Prénom"
+                                       value="{{ request.form.firstname }}"
+                                       required>
+                                <label for="firstname">Prénom</label>
+                                <div class="invalid-feedback">
+                                    Veuillez entrer un prénom
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nom -->
+                        <div class="mb-3">
+                            <div class="form-floating">
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="lastname"
+                                       name="lastname" 
+                                       placeholder="Nom"
+                                       value="{{ request.form.lastname }}"
+                                       required>
+                                <label for="lastname">Nom</label>
+                                <div class="invalid-feedback">
+                                    Veuillez entrer un nom
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <div class="form-floating">
+                                <input type="email" 
+                                       class="form-control" 
+                                       id="email"
+                                       name="email" 
+                                       placeholder="E-mail"
+                                       value="{{ request.form.email }}"
+                                       required>
+                                <label for="email">E-mail</label>
+                                <div class="invalid-feedback">
+                                    Veuillez entrer une adresse email valide
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Téléphone -->
+                        <div class="mb-4">
+                            <div class="form-floating">
+                                <input type="tel" 
+                                       class="form-control" 
+                                       id="phone"
+                                       name="phone" 
+                                       placeholder="Téléphone"
+                                       value="{{ request.form.phone }}"
+                                       pattern="^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$"
+                                       title="Veuillez entrer un numéro de téléphone valide (ex: 06 12 34 56 78 ou +33 6 12 34 56 78)"
+                                       required>
+                                <label for="phone">Téléphone</label>
+                                <div class="invalid-feedback">
+                                    Veuillez entrer un numéro de téléphone valide (ex: 06 12 34 56 78)
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bouton de soumission -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-person-plus-fill me-2"></i>
+                                Créer le patient
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if error %}
+            <div class="alert alert-danger mt-3" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>Erreur:</strong> {{ error }}
+            </div>
+            {% endif %}
+        </div>
     </div>
-    {% if error %}<p class="error"><strong>Error:</strong> {{ error }} {% endif %}
-</main>
+</div>
+
+<script>
+// Activation de la validation Bootstrap
+(function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+})()
+</script>
 {% endblock main %}

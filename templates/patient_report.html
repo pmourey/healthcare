@@ -1,38 +1,41 @@
-<!-- healthcare/templates/patient_health_data.html -->
-
 {% extends 'base.html' %}
 {% include './partials/_menu.html' %}
+{% from "partials/_chart_macro.html" import render_chart %}
 
 {% block main %}
-<main>
-    {% if patient.health_data %}
-        <h2>Rapport Patient - {{ patient.first_name }} {{ patient.last_name }} - Date du rapport: {{ today.strftime('%d/%m/%Y') }}</h2>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="{{ url_for('static', filename='js/patient_report.js') }}"></script>
-        <!-- Ajout du token CSRF -->
-        <meta name="csrf-token" content="{{ csrf_token() }}">
-        <div class="report-container">
-            <div class="chart-container">
-                <canvas id="healthChart"></canvas>
-            </div>
+<!-- Ajoutez Chart.js et votre fichier de configuration -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/chart-config.js') }}"></script>
 
-            <button class="no-print" onclick="window.print()">Imprimer le rapport</button>
-            <button class="no-print" onclick="sendEmail('{{ patient.email }}', '{{ patient.first_name }}', '{{ patient.last_name }}')">Envoyer le rapport par mail</button>
+<div class="container mt-4">
+    <h2>Rapport du patient</h2>
 
+    <!-- Debug info -->
+    <script>
+        console.log('Health Data:', {{ health_data|tojson|safe }});
+        console.log('Blood Data:', {{ blood_data|tojson|safe }});
+    </script>
+
+    <!-- Graphiques des données de santé -->
+    {% if health_data.markers %}
+        <div class="row">
+            {% for marker_id, marker_info in health_data.markers.items() %}
+                {% if marker_info['values'] and marker_info['values']|length > 0 %}
+                    {{ render_chart('health', marker_id, marker_info, health_data.dates) }}
+                {% endif %}
+            {% endfor %}
         </div>
-    {% else %}
-    <p style="font-size: 16px; text-align: center;">Aucune rapport de santé connue pour {{ patient.first_name }} {{ patient.last_name }} ✌️</p>
     {% endif %}
-</main>
-<script>
-    // Initialisation du graphique avec les données du patient
-    document.addEventListener('DOMContentLoaded', function() {
-        initializeHealthChart(
-            {{ dates|tojson }},
-            {{ weights|tojson }},
-            {{ blood_pressure_sys|tojson }},
-            {{ blood_pressure_dia|tojson }}
-        );
-    });
-</script>
-{% endblock main %}
+
+    <!-- Données sanguines -->
+    {% if blood_data.markers %}
+        <div class="row">
+            {% for marker_id, marker_info in blood_data.markers.items() %}
+                {% if marker_info['values'] and marker_info['values']|length > 0 %}
+                    {{ render_chart('blood', marker_id, marker_info, blood_data.dates) }}
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

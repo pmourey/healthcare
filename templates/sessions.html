@@ -1,32 +1,117 @@
 <!-- healthcare/templates/sessions.html -->
 
 {% extends 'base.html' %}
+{% include './partials/_menu.html' %}
+
 {% block main %}
-<main>
-    {% include './partials/_menu.html' %}
+<div class="container-fluid py-4">
     {% if sessions %}
-    <table class="sessions">
-        <thead>
-        <tr>
-            <th>Login</th>
-            <th>Début</th>
-            <th>Navigateur</th>
-            <th>Adresse IP</th>
-        </tr>
-        </thead>
-        {% for session in sessions %}
-        <div id="session">
-            <tr>
-                <td>{{ session.username }}</td>
-                <td>{{ session.start|format_paris_time }}</td>
-                <td>{{ session.browser_family }} (version {{ session.browser_version }})</td>
-                <td>{{ session.client_ip }}</td>
-            </tr>
+    <div class="row">
+        <div class="col">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h2 class="h5 mb-0">Sessions actives</h2>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-person me-2"></i>
+                                            Login
+                                        </div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-clock me-2"></i>
+                                            Début
+                                        </div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-globe me-2"></i>
+                                            Navigateur
+                                        </div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-ethernet me-2"></i>
+                                            Adresse IP
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for session in sessions %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-person-circle text-primary me-2"></i>
+                                            {{ session.username }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-clock text-secondary me-2"></i>
+                                            {{ session.start|format_paris_time }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-globe text-info me-2"></i>
+                                            {{ session.browser_family }}
+                                            <span class="badge bg-secondary ms-2">
+                                                version {{ session.browser_version }}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-pc-display text-success me-2"></i>
+                                            {{ session.client_ip }}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
-        {%endfor %}
-    </table>
+    </div>
     {% else %}
-    <p style="font-size: 16px; text-align: center;">Pas de session en cours ✌️</p>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="alert alert-info text-center" role="alert">
+                <i class="bi bi-info-circle me-2"></i>
+                Pas de session en cours
+                <i class="bi bi-emoji-smile ms-2"></i>
+            </div>
+        </div>
+    </div>
     {% endif %}
-</main>
+</div>
+
+<style>
+.table td {
+    white-space: nowrap;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(0,0,0,.03);
+    transition: background-color 0.2s ease-in-out;
+}
+
+.card {
+    border-radius: 0.5rem;
+}
+
+.card-header {
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+}
+</style>
 {% endblock main %}

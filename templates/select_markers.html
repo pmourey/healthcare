@@ -1,0 +1,137 @@
+<!-- healthcare/templates/select_markers.html -->
+
+{% extends 'base.html' %}
+{% include './partials/_menu.html' %}
+
+{% block main %}
+<main>
+    <h2>Sélection marqueurs</h2>
+<!--    <script src="{{ url_for('static', filename='js/patient_report.js') }}"></script>-->
+        <form action="{{ url_for('generate_graphs') }}" method="post">
+            <!-- Ajout du champ caché pour l'ID du patient -->
+            <input type="hidden" name="patient_id" value="{{ patient.id }}">
+            <div class="container mt-4">
+                <div class="row">
+                    <!-- Données de santé -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h4 class="mb-0">Données de santé</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex gap-3 mb-3">
+                                    <div class="form-check d-flex align-items-center">
+                                        <input type="checkbox" class="form-check-input me-2" id="select_all_health"
+                                               onclick="toggleHealthChecks(this, true)">
+                                        <label class="form-check-label" for="select_all_health">
+                                            <strong>Sélectionner tout</strong>
+                                        </label>
+                                    </div>
+                                    <div class="form-check d-flex align-items-center">
+                                        <input type="checkbox" class="form-check-input me-2" id="deselect_all_health"
+                                               onclick="toggleHealthChecks(this, false)">
+                                        <label class="form-check-label" for="deselect_all_health">
+                                            <strong>Désélectionner tout</strong>
+                                        </label>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="health-markers">
+                                    {% set health_markers = [
+                                        ('weight', 'Poids (kg)'),
+                                        ('height', 'Taille (cm)'),
+                                        ('imc', 'IMC (kg/m2)'),
+                                        ('temperature', 'Température (°C)'),
+                                        ('systolic_bp', 'Tension systolique'),
+                                        ('diastolic_bp', 'Tension diastolique'),
+                                        ('heart_rate', 'Fréquence cardiaque'),
+                                    ] %}
+
+                                    {% for marker_id, marker_name in health_markers %}
+                                        <div class="form-check d-flex align-items-center">
+                                            <input type="checkbox" class="form-check-input me-2 health-marker"
+                                                   id="health_{{ marker_id }}" name="health_markers"
+                                                   value="{{ marker_id }}">
+                                            <label class="form-check-label" for="health_{{ marker_id }}">
+                                                {{ marker_name }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analyses sanguines -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-danger text-white">
+                                <h4 class="mb-0">Analyses sanguines</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex gap-3 mb-3">
+                                    <div class="form-check d-flex align-items-center">
+                                        <input type="checkbox" class="form-check-input me-2" id="select_all_blood"
+                                               onclick="toggleBloodChecks(this, true)">
+                                        <label class="form-check-label" for="select_all_blood">
+                                            <strong>Sélectionner tout</strong>
+                                        </label>
+                                    </div>
+                                    <div class="form-check d-flex align-items-center">
+                                        <input type="checkbox" class="form-check-input me-2" id="deselect_all_blood"
+                                               onclick="toggleBloodChecks(this, false)">
+                                        <label class="form-check-label" for="deselect_all_blood">
+                                            <strong>Désélectionner tout</strong>
+                                        </label>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="blood-markers">
+                                    {% set blood_markers = [
+                                        ('hemoglobine', 'Hémoglobine (g/dL)'),
+                                        ('hematocrite', 'Hématocrite (%)'),
+                                        ('globules_blancs', 'Globules blancs (/mm³)'),
+                                        ('globules_rouges', 'Globules rouges (/mm³)'),
+                                        ('plaquettes', 'Plaquettes (/mm³)'),
+                                        ('creatinine', 'Créatinine (mg/L)'),
+                                        ('uree', 'Urée (mg/L)'),
+                                        ('glycemie', 'Glycémie (g/L)'),
+                                        ('cholesterol_total', 'Cholestérol total (g/L)'),
+                                        ('hdl', 'HDL (g/L)'),
+                                        ('ldl', 'LDL (g/L)'),
+                                        ('triglycerides', 'Triglycérides (g/L)'),
+                                        ('tsh', 'TSH (mUI/L)'),
+                                        ('psa', 'PSA (ng/mL)'),
+                                        ('alt', 'ALT (UI/L)'),
+                                        ('ast', 'AST (UI/L)'),
+                                        ('fer', 'Fer (µg/dL)'),
+                                        ('vitamine_d', 'Vitamine D (ng/mL)')
+                                    ] %}
+
+                                    {% for marker_id, marker_name in blood_markers %}
+                                        <div class="form-check d-flex align-items-center">
+                                            <input type="checkbox" class="form-check-input me-2 blood-marker"
+                                                   id="blood_{{ marker_id }}" name="blood_markers"
+                                                   value="{{ marker_id }}">
+                                            <label class="form-check-label" for="blood_{{ marker_id }}">
+                                                {{ marker_name }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-12 text-center">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            Générer les graphiques
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    {% if error %}<p class="error"><strong>Error:</strong> {{ error }} {% endif %}
+</main>
+{% endblock main %}

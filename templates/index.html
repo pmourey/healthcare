@@ -1,37 +1,82 @@
-<!-- healthcare/templates/index.html -->
-
 {% extends 'base.html' %}
 {% block main %}
-<main>
-    <!-- Votre contenu de page ici -->
+<div class="container py-4">
     {% if 'login_id' in session %}
-        <p>Bienvenue, Docteur {{user.username}}!</p>
-        <table class="welcome">
-            <tr>
-                <td><a href="{{ url_for('new_patient') }}">Nouveau patient</a></td>
-            </tr>
-            <tr>
-                <td><a href="{{ url_for('show_patients') }}">Liste patients</a></td>
-            </tr>
-            {% if user.is_admin %}
-            <tr>
-                <td><a href="{{ url_for('show_sessions') }}">Sessions ouvertes</a></td>
-            </tr>
-            <tr>
-                <td><a href="{{ url_for('show_accounts') }}">Gestion comptes utilisateurs</a></td>
-            </tr>
-            {% endif %}
-            <tr>
-                <td><a href="{{ url_for('reset_password', token=token) }}">Changement mot de passe</a></td>
-            </tr>
-            <tr>
-                <td><a href="{{ url_for('logout') }}">Déconnexion</a></td>
-            </tr>
-        </table>
+        <!-- En-tête avec message de bienvenue -->
+        <div class="row mb-4">
+            <div class="col-12 text-center">
+                <h2 class="h4">
+                    <i class="bi bi-person-circle me-2"></i>
+                    Bienvenue, Docteur {{user.username}}!
+                </h2>
+            </div>
+        </div>
+
+        <!-- Menu principal -->
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="list-group shadow">
+                    <!-- Options principales -->
+                    <a href="{{ url_for('new_patient') }}"
+                       class="list-group-item list-group-item-action d-flex align-items-center">
+                        <i class="bi bi-person-plus-fill me-3"></i>
+                        Nouveau patient
+                    </a>
+
+                    <a href="{{ url_for('show_patients') }}"
+                       class="list-group-item list-group-item-action d-flex align-items-center">
+                        <i class="bi bi-people-fill me-3"></i>
+                        Liste patients
+                    </a>
+
+                    {% if user.is_admin %}
+                        <!-- Options administrateur -->
+                        <a href="{{ url_for('show_sessions') }}"
+                           class="list-group-item list-group-item-action d-flex align-items-center">
+                            <i class="bi bi-clock-history me-3"></i>
+                            Sessions ouvertes
+                        </a>
+
+                        <a href="{{ url_for('show_accounts') }}"
+                           class="list-group-item list-group-item-action d-flex align-items-center">
+                            <i class="bi bi-people-gear me-3"></i>
+                            Gestion comptes utilisateurs
+                        </a>
+                    {% endif %}
+
+                    <!-- Options utilisateur -->
+                    <a href="{{ url_for('reset_password', token=token) }}"
+                       class="list-group-item list-group-item-action d-flex align-items-center">
+                        <i class="bi bi-key-fill me-3"></i>
+                        Changement mot de passe
+                    </a>
+
+                    <a href="{{ url_for('logout') }}"
+                       class="list-group-item list-group-item-action d-flex align-items-center text-danger">
+                        <i class="bi bi-box-arrow-right me-3"></i>
+                        Déconnexion
+                    </a>
+                </div>
+            </div>
+        </div>
+
     {% else %}
-        <p>Vous n'êtes pas connecté.</p>
-        <p><a href="{{ url_for('login') }}">Veuillez vous identifier!</a>.</p>
-        <!-- Autres éléments pour les utilisateurs non connectés -->
+        <!-- Page de connexion -->
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="text-center">
+                    <div class="alert alert-warning mb-4" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Vous n'êtes pas connecté
+                    </div>
+
+                    <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                        Se connecter
+                    </a>
+                </div>
+            </div>
+        </div>
     {% endif %}
-</main>
+</div>
 {% endblock main %}

@@ -1,26 +1,47 @@
-<!-- healthcare/templates/base.html -->
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-site-verification" content="PU-Vkrj-ZzYpYXePyi_1QUCFsuwbAHN0uHm592qwFIQ" />
+
+    <!-- Bootstrap CSS & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}">
+
     <title>Gestion santé</title>
 </head>
 
-<body>
+<body class="d-flex flex-column min-vh-100">
+    <!-- Messages flash -->
     {%- for category, message in get_flashed_messages(with_categories = true) %}
-    <div class="alert alert-danger">{{ message }}</div>
+    <div class="alert alert-{{ category }} alert-dismissible fade show m-3" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     {%- endfor %}
-    {% block main %}
 
-    {% endblock main %}
+    <!-- Contenu principal -->
+    <main class="flex-grow-1">
+        {% block main %}{% endblock main %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container text-center">
+            <p class="text-muted mb-0">
+                &copy; 2025 Philippe Mourey. Tous droits réservés.
+                <a href="https://github.com/pmourey/healthcare" class="text-decoration-none">
+                    <i class="bi bi-github"></i> Code source
+                </a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
-<footer>
-    <p>&copy; 2024 Philippe Mourey. Tous droits réservés. (<a href="https://github.com/pmourey/healthcare">lien projet</a>)</p>
-</footer>
-
 </html>

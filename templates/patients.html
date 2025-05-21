@@ -1,46 +1,155 @@
-<!-- healthcare/templates/patients.html -->
-
 {% extends 'base.html' %}
 {% include './partials/_menu.html' %}
 
 {% block main %}
-<main>
+<div class="container-fluid py-4">
     {% if patients %}
-    <h2>Liste des patients du Docteur {{ user.username }} :-)</h2>
-    <table class="jobs">
-        <thead>
-        <tr>
-            <th>Visites</th>
-            <th>Analyses</th>
-            <th>Nouvelle visite</th>
-            <th>Nouvelle analyse</th>
-            <th>Graphiques</th>
-            <th>Prénom</th>
-            <th>Nom</th>
-            <th>E-Mail</th>
-            <th>Téléphone</th>
-            <th>Date création</th>
-        </tr>
-        </thead>
-        {% for patient in patients %}
-        <div id="job">
-            <tr>
-                <td><button><a href="{{ url_for('show_health_data', id=patient.id) }}" class="button">Consulter</a></button></td>
-                <td><button><a href="{{ url_for('show_blood_data', id=patient.id) }}" class="button">Consulter</a></button></td>
-                <td><button><a href="{{ url_for('new_health_data', id=patient.id) }}" class="button">Créer</a></button></td>
-                <td><button><a href="{{ url_for('new_blood_data', id=patient.id) }}" class="button">Créer</a></button></td>
-                <td><button><a href="{{ url_for('patient_report', id=patient.id) }}" class="button">Consulter</a></button></td>
-                <td>{{ patient.first_name }}</td>
-                <td>{{ patient.last_name }}</td>
-                <td>{{ patient.email }}</td>
-                <td>{{ patient.phone }}</td>
-                <td>{{patient.creation_date.strftime('%A %d %B %Y')}}</td>
-            </tr>
-        </div>
-        {%endfor %}
-    </table>
+    <h2 class="text-center mb-4">Patients du Dr {{ user.username }}</h2>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Actions</th>
+                    <th>Nom</th>
+                    <th>Contact</th>
+                    <th>Date création</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in patients %}
+                <tr>
+                    <td class="position-relative"> <!-- Ajout de position-relative ici -->
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle"
+                                    type="button"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                Actions
+                            </button>
+                            <ul class="dropdown-menu"> <!-- Suppression de style="position: fixed" -->
+                                <li><a class="dropdown-item" href="{{ url_for('show_health_data', id=patient.id) }}">
+                                    <i class="bi bi-journal-medical me-2"></i> Visites
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('show_blood_data', id=patient.id) }}">
+                                    <i class="bi bi-droplet"></i> Analyses
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('new_health_data', id=patient.id) }}">
+                                    <i class="bi bi-plus-circle"></i> Nouvelle visite
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('new_blood_data', id=patient.id) }}">
+                                    <i class="bi bi-plus-circle"></i> Nouvelle analyse
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('select_markers', id=patient.id) }}">
+                                    <i class="bi bi-graph-up"></i> Graphiques
+                                </a></li>
+                            </ul>
+                        </div>
+                    </td>
+                    <td>
+                        {{ patient.first_name }} {{ patient.last_name }}
+                    </td>
+                    <td>
+                        <a href="mailto:{{ patient.email }}" class="text-decoration-none me-3">
+                            <i class="bi bi-envelope"></i> {{ patient.email }}
+                        </a>
+                        <a href="tel:{{ patient.phone }}" class="text-decoration-none">
+                            <i class="bi bi-telephone"></i> {{ patient.phone }}
+                        </a>
+                    </td>
+                    <td>{{patient.creation_date.strftime('%d/%m/%Y')}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% else %}
-    <p style="font-size: 16px; text-align: center;">Aucun patient défini pour le Docteur {{ user.username }} ✌️</p>
+    <div class="alert alert-info text-center" role="alert">
+        Aucun patient défini pour le Dr {{ user.username }}
+    </div>
     {% endif %}
-</main>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gérer le positionnement des menus déroulants
+    const dropdownButtons = document.querySelectorAll('.dropdown-toggle');
+
+    dropdownButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const dropdownMenu = this.nextElementSibling;
+            const buttonRect = this.getBoundingClientRect();
+
+            // Positionner le menu sous le bouton
+            dropdownMenu.style.top = `${buttonRect.bottom}px`;
+            dropdownMenu.style.left = `${buttonRect.left}px`;
+            dropdownMenu.style.minWidth = `${buttonRect.width}px`;
+        });
+    });
+
+    // Fermer les menus lors du défilement
+    document.addEventListener('scroll', function() {
+        const openMenus = document.querySelectorAll('.dropdown-menu.show');
+        openMenus.forEach(menu => {
+            const dropdown = bootstrap.Dropdown.getInstance(menu.previousElementSibling);
+            if (dropdown) {
+                dropdown.hide();
+            }
+        });
+    });
+});
+</script>
+
+<style>
+/* Styles essentiels pour le dropdown dans le tableau */
+.table td {
+    position: relative !important;
+}
+
+.dropdown {
+    position: relative !important;
+}
+
+.dropdown-menu {
+    position: absolute !important;
+    transform: none !important;
+    top: 100% !important;
+    left: 0 !important;
+    margin-top: 0 !important;
+    z-index: 1021 !important;
+}
+
+/* Assurer que les conteneurs ne masquent pas le dropdown */
+.table-responsive,
+.table-container,
+.container-fluid,
+.container,
+.row,
+.col {
+    overflow: visible !important;
+}
+
+/* Style optionnel pour améliorer l'apparence */
+.dropdown-menu {
+    min-width: 200px;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 0.375rem;
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(0,0,0,.05);
+}
+</style>
+
+
 {% endblock main %}

@@ -21,7 +21,7 @@ from pytz import timezone
 from sqlalchemy import desc
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from Controller import get_user_by_id, check, send_confirmation_email, send_password_recovery_email, get_session_by_login, create_user, validate_password_complexity
+from Controller import get_user_by_id, check, send_confirmation_email, send_password_recovery_email, get_session_by_login, validate_password_complexity
 from Model import User, db, Session, Patient, HealthData, AnalyseSanguine
 
 import secrets
@@ -36,7 +36,6 @@ from datetime import datetime, timedelta
 from decorators import is_connected, is_admin
 from tools.send_emails import send_email
 
-
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 # Set the secret key
 app.secret_key = secrets.token_bytes(32).hex()
@@ -44,6 +43,7 @@ app.secret_key = secrets.token_bytes(32).hex()
 app.serializer = URLSafeSerializer(app.secret_key)
 # Config
 app.config.from_object('config.Config')
+app.config.from_object('config.Medical')
 # Initialize extensions
 db.init_app(app)
 # migrate.init_app(app, db)
@@ -78,6 +78,7 @@ def get_client_ip():
 		client_ip = request.remote_addr
 	return client_ip
 
+
 @csrf.exempt
 @app.route('/')
 def welcome():
@@ -89,7 +90,7 @@ def welcome():
 		s = Serializer(app.config['SECRET_KEY'])
 		token = s.dumps({'user_id': user.id})
 		# Mettez à jour le modèle d'utilisateur avec le jeton et le délai d'expiration
-		# user.recovery_token = generate_password_hash(token, method='sha256')
+		# user.recovery_token = generate_password_hash(token, method='pbkdf2:sha256')
 		user.recovery_token = generate_password_hash(token)
 		user.token_expiration = datetime.now() + timedelta(hours=24)
 		db.session.commit()
@@ -101,6 +102,7 @@ def welcome():
 		browser_info = f"Family = {user_agent.browser.family}, Version = {user_agent.browser.version_string}"
 		app.logger.debug(f"Client IP: {client_ip}, Browser: ({browser_info})")
 	return render_template('index.html', session=session, user=user, token=token)
+
 
 @csrf.exempt
 @app.route("/register", methods=['GET', 'POST'])
@@ -126,9 +128,13 @@ def register():
 				error = f'email {email} is invalid! Please check syntax.'
 			else:
 				try:
-					user = create_user(username, password, email)  # Add code to save user to database
-					# user = User(username=username, password=password, creation_date=datetime.now(), email=email)
-					# logging.warning("See this message in Flask Debug Toolbar!")
+					is_valid, message = validate_password_complexity(password)
+					if not is_valid:
+						raise ValueError(f"Password validation failed!")
+
+					# Continuer le traitement si le mot de passe est valide
+					user = User(username=username, password=password, creation_date=datetime.now(), email=email)
+
 					db.session.add(user)
 					db.session.commit()
 					s = Serializer(app.config['SECRET_KEY'])
@@ -136,7 +142,7 @@ def register():
 					token = s.dumps({'user_id': user.id})
 
 					# Mettez à jour le modèle d'utilisateur avec le jeton et le délai d'expiration
-					# user.recovery_token = generate_password_hash(token, method='sha256')
+					# user.recovery_token = generate_password_hash(token, method='pbkdf2:sha256')
 					user.recovery_token = generate_password_hash(token)
 					user.token_expiration = datetime.now() + timedelta(minutes=10)
 					# app.logger.debug(f'time zone info: {user.token_expiration.tzinfo}')
@@ -154,6 +160,7 @@ def register():
 					error = str(e)
 	return render_template('register.html', error=error)
 
+
 @csrf.exempt
 @app.route("/login", methods=['GET', 'POST'])
 def login():
@@ -161,8 +168,14 @@ def login():
 	error = None
 	if request.method == 'POST':
 		user = User.query.filter_by(username=request.form['username']).first()
-		app.logger.debug(f'user = {user} - clear pwd = {request.form["password"]}')
-		if user and check_password_hash(user.password, password=request.form['password']):
+		app.logger.debug(f'user = {user.username} - clear pwd = {request.form["password"]}')
+		is_pass_ok = check_password_hash(user.password, request.form["password"])
+		app.logger.debug(f'user (login) = {user.username} - is_pass_ok = {is_pass_ok}')
+
+		password_attempt = request.form["password"]
+		stored_hash = user.password
+
+		if user and check_password_hash(stored_hash, password_attempt):
 			if user.validated:
 				session['login_id'] = user.id
 				app.logger.debug(f'user (login) = {user.username} - id = {user.id} - session: {session}')
@@ -182,6 +195,7 @@ def login():
 			return render_template('login.html', error=error)
 	return render_template('login.html', error=error)
 
+
 @csrf.exempt
 @app.route("/change_password", methods=['GET', 'POST'])
 @is_connected
@@ -197,7 +211,8 @@ def change_password():
 				is_valid, error_message = validate_password_complexity(new_password)
 				if not is_valid:
 					raise ValueError(error_message)
-				user.password = generate_password_hash(new_password, method='sha256')
+				# user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
+				user.password = generate_password_hash(new_password)
 				db.session.add(user)
 				db.session.commit()
 				flash('Password was successfully changed!')
@@ -208,6 +223,7 @@ def change_password():
 		else:
 			error = 'Passwords does not match! Please try again.'
 	return render_template('reset_password.html', error=error)
+
 
 @csrf.exempt
 @app.route('/request_reset_password', methods=['GET', 'POST'])
@@ -221,7 +237,7 @@ def request_reset_password():
 			token = s.dumps({'user_id': user.id})
 
 			# Mettez à jour le modèle d'utilisateur avec le jeton et le délai d'expiration
-			# user.recovery_token = generate_password_hash(token, method='sha256')
+			# user.recovery_token = generate_password_hash(token, method='pbkdf2:sha256')
 			user.recovery_token = generate_password_hash(token)
 			user.token_expiration = datetime.now() + timedelta(minutes=10)
 
@@ -232,12 +248,14 @@ def request_reset_password():
 
 			flash('Un e-mail de récupération de mot de passe a été envoyé.', 'success')
 			reset_link = url_for('reset_password', token=token, _external=True)
+			app.logger.debug(f'reset_link = {reset_link}')
 			send_password_recovery_email(app=app, reset_link=reset_link, user=user, author=app.config['GMAIL_FULLNAME'])
 			return redirect(url_for('login'))
 
 		flash('Aucun utilisateur trouvé avec cet e-mail.', 'error')
 
 	return render_template('request_reset_password.html')
+
 
 @app.route('/validate_email/<token>', methods=['GET', 'POST'])
 def validate_email(token):
@@ -246,6 +264,7 @@ def validate_email(token):
 	s = Serializer(app.config['SECRET_KEY'])
 	try:
 		data = s.loads(token)
+		app.logger.debug(f'data = {data}')
 		user = User.query.get_or_404(data['user_id'])
 		# Calculate the time difference
 		remaining_minutes = int((user.token_expiration - datetime.now()).total_seconds() / 60)
@@ -274,6 +293,7 @@ def validate_email(token):
 
 	flash('Votre compte a été confirmé avec succès.', 'success')
 	return redirect(url_for('login'))
+
 
 @csrf.exempt
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
@@ -306,7 +326,7 @@ def reset_password(token):
 				if not is_valid:
 					raise ValueError(error_message)
 				# Mettre à jour le mot de passe de l'utilisateur
-				# user.password = generate_password_hash(new_password, method='sha256')
+				# user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
 				user.password = generate_password_hash(new_password)
 
 				# Réinitialiser le champ de récupération de mot de passe
@@ -351,6 +371,22 @@ def show_accounts():
 	return render_template('accounts.html', accounts=accounts, user=user)
 
 
+@csrf.exempt
+@app.route('/delete_account/<int:id>', methods=['GET', 'POST'])
+@is_connected
+@is_admin
+def delete_account(id):
+	app.logger.debug(f'Delete user #{id}')
+	if request.method == 'GET':
+		user = User.query.get_or_404(id)
+		app.logger.debug(f'User debug: {user}')
+		db.session.delete(user)
+		db.session.commit()
+		flash(f'User \"{user.username}\" has been deleted!')
+		return redirect(url_for('show_accounts'))
+
+
+@csrf.exempt
 @app.route('/update_account/<int:id>', methods=['GET', 'POST'])
 @is_connected
 @is_admin
@@ -374,6 +410,7 @@ def show_sessions():
 	# Reverse order query
 	sessions = Session.query.filter(Session.end.is_(None)).order_by(desc(Session.id)).all()
 	return render_template('sessions.html', sessions=sessions)
+
 
 @csrf.exempt
 @app.route('/new_patient/', methods=['GET', 'POST'])
@@ -403,6 +440,7 @@ def new_patient():
 				return redirect(url_for('new_patient'))
 
 	return render_template('new_patient.html')
+
 
 @csrf.exempt
 @app.route('/new_health_data/<int:id>', methods=['GET', 'POST'])
@@ -435,6 +473,7 @@ def new_health_data(id: int):
 def show_health_data(id: int):
 	patient = Patient.query.get_or_404(id)
 	return render_template('patient_health_data.html', patient=patient)
+
 
 @csrf.exempt
 @app.route('/new_blood_data_old/<int:id>', methods=['GET', 'POST'])
@@ -516,7 +555,8 @@ def new_blood_data(id: int):
 			flash(f'Error in form: {str(e)}', 'error')
 			return render_template('new_blood_data.html', patient=patient), 400
 
-	return render_template('new_blood_data.html', patient=patient)
+	return render_template('new_blood_data.html', patient=patient, limits=app.config['LIMITS'])
+
 
 @app.route('/show_blood_data/<int:id>')
 @is_connected
@@ -524,6 +564,7 @@ def show_blood_data(id: int):
 	patient = Patient.query.get_or_404(id)
 	thresholds = {'hemoglobine': {'min': 13.0, 'max': 18.0, 'unit': 'g/dL'}, 'hematocrite': {'min': 37.0, 'max': 50.0, 'unit': '%'}, 'globules_blancs': {'min': 4000, 'max': 11000, 'unit': '/mm³'}, 'globules_rouges': {'min': 4.6e6, 'max': 6.2e6, 'unit': '/mm³'}, 'plaquettes': {'min': 150000, 'max': 400000, 'unit': '/mm³'}, 'creatinine': {'min': 7.2, 'max': 11.8, 'unit': 'mg/L'}, 'uree': {'min': 35, 'max': 72, 'unit': 'mg/L'}, 'glycemie': {'min': 0.74, 'max': 1.06, 'unit': 'g/L'}, 'cholesterol_total': {'min': 0, 'max': 2, 'unit': 'g/L'}, 'hdl': {'min': 0.4, 'max': 0.6, 'unit': 'g/L'}, 'ldl': {'min': 0, 'max': 1.30, 'unit': 'g/L'}, 'triglycerides': {'min': 0, 'max': 1.5, 'unit': 'g/L'}, 'tsh': {'min': 0.38, 'max': 5.33, 'unit': 'mUI/L'}, 'psa': {'min': 0, 'max': 4.0, 'unit': 'ng/mL'}, 'alt': {'min': 7, 'max': 50, 'unit': 'UI/L'}, 'ast': {'min': 8, 'max': 50, 'unit': 'UI/L'}, 'fer': {'min': 60, 'max': 170, 'unit': 'µg/dL'}, 'vitamine_d': {'min': 30, 'max': 100, 'unit': 'ng/mL'}}
 	return render_template('patient_blood_data.html', patient=patient, thresholds=thresholds)
+
 
 @app.route('/show_patients')
 @is_connected
@@ -550,16 +591,7 @@ def send_health_reports(patient_id):
 	user: User = get_user_by_id(session['login_id'])
 	# Fetch the selected reports
 	reports = HealthData.query.filter(HealthData.id.in_(selected_reports)).all()
-	if send_email(subject=f'Rapports de santé - {patient.first_name} {patient.last_name}',
-			   body=render_template('email/health_report.html', patient=patient, reports=reports),
-			   sender_email=user.email,
-			   recipient_email=patient.email,
-			   bcc_recipients=[],
-			   smtp_server=app.config['SMTP_SERVER'],
-			   smtp_port=app.config['SMTP_PORT'],
-			   username=app.config['GMAIL_USER'],
-			   password=app.config['GMAIL_APP_PWD'],
-			   author=app.config['GMAIL_FULLNAME']):
+	if send_email(subject=f'Rapports de santé - {patient.first_name} {patient.last_name}', body=render_template('email/health_report.html', patient=patient, reports=reports), sender_email=user.email, recipient_email=patient.email, bcc_recipients=[], smtp_server=app.config['SMTP_SERVER'], smtp_port=app.config['SMTP_PORT'], username=app.config['GMAIL_USER'], password=app.config['GMAIL_APP_PWD'], author=app.config['GMAIL_FULLNAME']):
 
 		flash('Rapports envoyés avec succès', 'success')
 	else:
@@ -582,16 +614,7 @@ def send_blood_reports(patient_id):
 	user: User = get_user_by_id(session['login_id'])
 	# Fetch the selected reports
 	reports = AnalyseSanguine.query.filter(AnalyseSanguine.id.in_(selected_reports)).all()
-	if send_email(subject=f'Analyses de sang - {patient.first_name} {patient.last_name}',
-			   body=render_template('email/blood_report.html', patient=patient, reports=reports),
-			   sender_email=user.email,
-			   recipient_email=patient.email,
-			   bcc_recipients=[],
-			   smtp_server=app.config['SMTP_SERVER'],
-			   smtp_port=app.config['SMTP_PORT'],
-			   username=app.config['GMAIL_USER'],
-			   password=app.config['GMAIL_APP_PWD'],
-			   author=app.config['GMAIL_FULLNAME']):
+	if send_email(subject=f'Analyses de sang - {patient.first_name} {patient.last_name}', body=render_template('email/blood_report.html', patient=patient, reports=reports), sender_email=user.email, recipient_email=patient.email, bcc_recipients=[], smtp_server=app.config['SMTP_SERVER'], smtp_port=app.config['SMTP_PORT'], username=app.config['GMAIL_USER'], password=app.config['GMAIL_APP_PWD'], author=app.config['GMAIL_FULLNAME']):
 
 		flash('Rapports envoyés avec succès', 'success')
 	else:
@@ -660,7 +683,7 @@ def send_report_email():
 
 		# Envoyer l'email
 		success = send_email(subject=f'Rapport médical - {first_name} {last_name}', body=msg,  # Passer directement l'objet MIMEMultipart
-			sender_email=app.config['GMAIL_USER'], recipient_email=email, bcc_recipients=[], smtp_server=app.config['SMTP_SERVER'], smtp_port=app.config['SMTP_PORT'], username=app.config['GMAIL_USER'], password=app.config['GMAIL_APP_PWD'], author="Service Médical")
+							 sender_email=app.config['GMAIL_USER'], recipient_email=email, bcc_recipients=[], smtp_server=app.config['SMTP_SERVER'], smtp_port=app.config['SMTP_PORT'], username=app.config['GMAIL_USER'], password=app.config['GMAIL_APP_PWD'], author="Service Médical")
 
 		if success:
 			return jsonify({'success': True})
@@ -669,6 +692,146 @@ def send_report_email():
 
 	except Exception as e:
 		return jsonify({'success': False, 'error': str(e)})
+
+
+@app.route('/select_markers/<int:id>')
+@is_connected
+def select_markers(id):
+	patient = Patient.query.get_or_404(id)
+	return render_template('select_markers.html', patient=patient)
+
+
+@csrf.exempt
+@app.route('/generate_graphs', methods=['POST'])
+@is_connected
+def generate_graphs():
+	patient = Patient.query.get_or_404(request.form.get('patient_id'))
+	health_markers = request.form.getlist('health_markers')
+	blood_markers = request.form.getlist('blood_markers')
+
+	# Récupération des données
+	health_data = HealthData.query.filter_by(patient_id=patient.id).order_by(HealthData.creation_date).all()
+	blood_data = AnalyseSanguine.query.filter_by(patient_id=patient.id).order_by(AnalyseSanguine.date_analyse).all()
+
+	# Dictionnaires pour stocker les données sélectionnées
+	selected_health_data = {'dates': [data.creation_date.strftime('%d/%m/%Y') for data in health_data], 'markers': {}}
+
+	selected_blood_data = {'dates': [data.date_analyse.strftime('%d/%m/%Y') for data in blood_data], 'markers': {}}
+
+	# Mapping des marqueurs de santé selon le template
+	health_marker_mapping = {'weight': ('weight', 'Poids'), 'height': ('height', 'Taille'), 'imc': ('imc', 'IMC'), 'temperature': ('temperature', 'Température'), 'systolic_bp': ('blood_pressure_sys', 'Tension systolique'), 'diastolic_bp': ('blood_pressure_dia', 'Tension diastolique'), 'heart_rate': ('heart_rate', 'Fréquence cardiaque')}
+
+	# Mapping des marqueurs sanguins selon le template
+	blood_marker_mapping = {'hemoglobine': ('hemoglobine', 'Hémoglobine'), 'hematocrite': ('hematocrite', 'Hématocrite'), 'globules_blancs': ('globules_blancs', 'Globules blancs'), 'globules_rouges': ('globules_rouges', 'Globules rouges'), 'plaquettes': ('plaquettes', 'Plaquettes'), 'creatinine': ('creatinine', 'Créatinine'), 'uree': ('uree', 'Urée (Acide urique)'), 'glycemie': ('glycemie', 'Glycémie'), 'cholesterol_total': ('cholesterol_total', 'Cholestérol total'), 'hdl': ('hdl', 'HDL'), 'ldl': ('ldl', 'LDL'), 'triglycerides': ('triglycerides', 'Triglycérides'), 'tsh': ('tsh', 'TSH'), 'psa': ('psa', 'PSA'), 'alt': ('alt', 'ALT (Transaminases SGPT)'), 'ast': ('ast', 'AST (Transaminases SGOT)'), 'fer': ('fer', 'Fer'), 'vitamine_d': ('vitamine_d', 'Vitamine D')}
+
+	# Unités pour chaque marqueur
+	marker_units = {'weight': 'kg', 'height': 'cm', 'imc': 'kg/m2', 'temperature': '°C', 'systolic_bp': 'mmHg', 'diastolic_bp': 'mmHg', 'heart_rate': 'bpm', 'hemoglobine': 'g/dL', 'hematocrite': '%', 'globules_blancs': '/mm³', 'globules_rouges': '/mm³', 'plaquettes': '/mm³', 'creatinine': 'mg/L', 'uree': 'mg/L', 'glycemie': 'g/L', 'cholesterol_total': 'g/L', 'hdl': 'g/L', 'ldl': 'g/L', 'triglycerides': 'g/L', 'tsh': 'mUI/L', 'psa': 'ng/mL', 'alt': 'UI/L', 'ast': 'UI/L', 'fer': 'µg/dL', 'vitamine_d': 'ng/mL'}
+
+	# Récupération des données de santé sélectionnées
+	for marker in health_markers:
+		if marker in health_marker_mapping:
+			attr_name, display_name = health_marker_mapping[marker]
+			# Conversion explicite des valeurs en liste de nombres
+			values = []
+			for data in health_data:
+				try:
+					if attr_name == 'imc':
+						val = data.imc  # Utilise la propriété imc
+					else:
+						val = getattr(data, attr_name)
+					# Convertir en float si possible, sinon None
+					values.append(float(val))  # values.append(float(val) if val is not None else None)
+				except (ValueError, TypeError, AttributeError):
+					# values.append(None)
+					continue  # Ignore les valeurs problématiques
+
+			# Ne crée l'entrée que si des valeurs existent
+			if values:  # Vérifie si la liste n'est pas vide
+				selected_health_data['markers'][marker] = {'values': values, 'display_name': display_name, 'unit': marker_units.get(marker, ''), 'limits': {'min': app.config['LIMITS'][marker]['min'], 'max': app.config['LIMITS'][marker]['max']}}
+
+	app.logger.debug(f'selected_health_data: {selected_health_data}')
+
+	# Récupération des données sanguines sélectionnées
+	for marker in blood_markers:
+		if marker in blood_marker_mapping:
+			attr_name, display_name = blood_marker_mapping[marker]
+			# Conversion explicite des valeurs en liste de nombres
+			values = []
+			for data in blood_data:
+				try:
+					val = getattr(data, attr_name)
+					values.append(float(val))
+				except (ValueError, TypeError, AttributeError):
+					continue
+
+			if values:
+				selected_blood_data['markers'][marker] = {'values': values, 'display_name': display_name, 'unit': marker_units.get(marker, ''), 'limits': {'min': app.config['LIMITS'][marker]['min'], 'max': app.config['LIMITS'][marker]['max']}}
+
+	app.logger.debug(f'selected_blood_data: {selected_blood_data}')
+
+	# Conversion des données en format JSON-compatible
+	return render_template('patient_report.html', patient=patient, today=datetime.now().strftime('%d/%m/%Y'), health_data=selected_health_data, blood_data=selected_blood_data, selected_health_markers=health_markers, selected_blood_markers=blood_markers)
+
+
+def generate_graphs_ori():
+	patient = Patient.query.get_or_404(request.form.get('patient_id'))
+	health_markers = request.form.getlist('health_markers')
+	blood_markers = request.form.getlist('blood_markers')
+	app.logger.debug(f'health_markers: {health_markers}')
+	app.logger.debug(f'blood_markers: {blood_markers}')
+
+	# Récupération des données
+	health_data = HealthData.query.filter_by(patient_id=patient.id).order_by(HealthData.creation_date).all()
+	blood_data = AnalyseSanguine.query.filter_by(patient_id=patient.id).order_by(AnalyseSanguine.date_analyse).all()
+
+	# Dictionnaires pour stocker les données sélectionnées
+	selected_health_data = {'dates': [data.creation_date.strftime('%d/%m/%Y') for data in health_data], 'markers': {}}
+
+	selected_blood_data = {'dates': [data.date_analyse.strftime('%d/%m/%Y') for data in blood_data], 'markers': {}}
+
+	# Mapping des marqueurs de santé selon le template
+	health_marker_mapping = {'weight': ('weight', 'Poids'), 'height': ('height', 'Taille'), 'temperature': ('temperature', 'Température'), 'systolic_bp': ('blood_pressure_sys', 'Tension systolique'), 'diastolic_bp': ('blood_pressure_dia', 'Tension diastolique'), 'heart_rate': ('heart_rate', 'Fréquence cardiaque')}
+
+	# Mapping des marqueurs sanguins selon le template
+	blood_marker_mapping = {'hemoglobine': ('hemoglobine', 'Hémoglobine'), 'hematocrite': ('hematocrite', 'Hématocrite'), 'globules_blancs': ('globules_blancs', 'Globules blancs'), 'globules_rouges': ('globules_rouges', 'Globules rouges'), 'plaquettes': ('plaquettes', 'Plaquettes'), 'creatinine': ('creatinine', 'Créatinine'), 'uree': ('uree', 'Urée'), 'glycemie': ('glycemie', 'Glycémie'), 'cholesterol_total': ('cholesterol_total', 'Cholestérol total'), 'hdl': ('hdl', 'HDL'), 'ldl': ('ldl', 'LDL'), 'triglycerides': ('triglycerides', 'Triglycérides'), 'tsh': ('tsh', 'TSH'), 'psa': ('psa', 'PSA'), 'alt': ('alt', 'ALT'), 'ast': ('ast', 'AST'), 'fer': ('fer', 'Fer'), 'vitamine_d': ('vitamine_d', 'Vitamine D')}
+
+	# Unités pour chaque marqueur
+	marker_units = {'weight': 'kg', 'height': 'cm', 'temperature': '°C', 'systolic_bp': 'mmHg', 'diastolic_bp': 'mmHg', 'heart_rate': 'bpm', 'hemoglobine': 'g/dL', 'hematocrite': '%', 'globules_blancs': '/mm³', 'globules_rouges': '/mm³', 'plaquettes': '/mm³', 'creatinine': 'mg/L', 'uree': 'mg/L', 'glycemie': 'g/L', 'cholesterol_total': 'g/L', 'hdl': 'g/L', 'ldl': 'g/L', 'triglycerides': 'g/L', 'tsh': 'mUI/L', 'psa': 'ng/mL', 'alt': 'UI/L', 'ast': 'UI/L', 'fer': 'µg/dL', 'vitamine_d': 'ng/mL'}
+
+	# Récupération des données de santé sélectionnées
+	for marker in health_markers:
+		if marker in health_marker_mapping:
+			attr_name, display_name = health_marker_mapping[marker]
+			# Conversion des valeurs en float pour assurer la sérialisation JSON
+			values = []
+			for data in health_data:
+				value = getattr(data, attr_name)
+				# Convertir None ou les valeurs non-numériques en None
+				try:
+					values.append(float(value) if value is not None else None)
+				except (ValueError, TypeError):
+					values.append(None)
+
+			selected_health_data['markers'][marker] = {'values': values, 'display_name': display_name, 'unit': marker_units.get(marker, '')}
+
+	# Récupération des données sanguines sélectionnées
+	for marker in blood_markers:
+		if marker in blood_marker_mapping:
+			attr_name, display_name = blood_marker_mapping[marker]
+			# Conversion des valeurs en float pour assurer la sérialisation JSON
+			values = []
+			for data in blood_data:
+				value = getattr(data, attr_name)
+				# Convertir None ou les valeurs non-numériques en None
+				try:
+					values.append(float(value) if value is not None else None)
+				except (ValueError, TypeError):
+					values.append(None)
+
+			selected_blood_data['markers'][marker] = {'values': values, 'display_name': display_name, 'unit': marker_units.get(marker, '')}
+
+	return render_template('patient_report.html', patient=patient, today=datetime.now(),  # Formatage de la date
+						   health_data=selected_health_data, blood_data=selected_blood_data, selected_health_markers=health_markers, selected_blood_markers=blood_markers)
 
 
 @app.before_request

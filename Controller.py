@@ -6,6 +6,7 @@ from functools import wraps
 from typing import Match
 
 from dateutil.relativedelta import relativedelta
+from flask import flash
 from werkzeug.security import generate_password_hash
 
 from Model import User, db, Session
@@ -67,7 +68,7 @@ def send_password_recovery_email(app, reset_link: str, user: User, author: str) 
 """ Password policy check """
 
 
-def validate_password_complexity(password):
+def validate_password_complexity_old(password):
 	"""
     Validates password against security requirements for healthcare systems.
     Returns (bool, str) tuple - (is_valid, error_message)
@@ -103,20 +104,57 @@ def validate_password_complexity(password):
 	return True, "Password meets security requirements"
 
 
-def create_user(username, password, email):
-	try:
-		# Validate password complexity
-		is_valid, error_message = validate_password_complexity(password)
-		if not is_valid:
-			raise ValueError(error_message)
+def validate_password_complexity(password):
+    """
+    Validates password against security requirements for healthcare systems.
+    Returns (bool, str) tuple - (is_valid, error_message)
+    """
+    # # Liste des règles pour affichage
+    # password_rules = [
+    #     "Au moins 10 caractères",
+    #     "Au moins une lettre majuscule",
+    #     "Au moins une lettre minuscule",
+    #     "Au moins un chiffre",
+    #     "Au moins un caractère spécial (!@#$%^&*(),.?\":{}|<>)",
+    #     "Pas de motifs communs (password, 123456, qwerty, admin)",
+    #     "Pas de caractères répétés plus de deux fois"
+    # ]
 
-		# If validation passes, create the user
-		# It's recommended to hash the password before storing
-		hashed_password = generate_password_hash(password)
+    # # Afficher les règles avec flash
+    # flash("Règles de sécurité du mot de passe:", "info")
+    # for rule in password_rules:
+    #     flash(f"• {rule}", "info")
 
-		user = User(username=username, password=hashed_password, creation_date=datetime.now(), email=email)
+    # Validation
+    if len(password) < 10:
+        # flash("Erreur: Le mot de passe doit contenir au moins 10 caractères", "error")
+        return False, "Password must be at least 10 characters long"
 
-		return user
+    if not re.search(r'[A-Z]', password):
+        # flash("Erreur: Le mot de passe doit contenir au moins une majuscule", "error")
+        return False, "Password must contain at least one uppercase letter"
 
-	except ValueError as e:
-		raise ValueError(f"Password validation failed: {str(e)}")
+    if not re.search(r'[a-z]', password):
+        # flash("Erreur: Le mot de passe doit contenir au moins une minuscule", "error")
+        return False, "Password must contain at least one lowercase letter"
+
+    if not re.search(r'\d', password):
+        # flash("Erreur: Le mot de passe doit contenir au moins un chiffre", "error")
+        return False, "Password must contain at least one number"
+
+    if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+        # flash("Erreur: Le mot de passe doit contenir au moins un caractère spécial", "error")
+        return False, "Password must contain at least one special character"
+
+    common_patterns = ['password', '123456', 'qwerty', 'admin']
+    if any(pattern in password.lower() for pattern in common_patterns):
+        # flash("Erreur: Le mot de passe contient des motifs interdits", "error")
+        return False, "Password contains common patterns that are not allowed"
+
+    if re.search(r'(.)\1{2,}', password):
+        # flash("Erreur: Le mot de passe ne peut pas contenir de caractères répétés plus de deux fois", "error")
+        return False, "Password cannot contain characters repeating more than twice"
+
+    flash("Le mot de passe respecte toutes les règles de sécurité", "success")
+    return True, "Password meets security requirements"
+
