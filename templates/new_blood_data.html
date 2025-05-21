@@ -23,84 +23,75 @@
                         <!-- Première colonne -->
                         <div class="col-md-6">
                             <div class="mb-3">
+                                <div class="d-flex flex-column align-items-center text-center">
                                     <label class="form-label mb-0">Hémoglobine</label>
-                                    <small class="text-muted">
-                                        ({{ limits['hemoglobine']['min'] }}-{{ limits['hemoglobine']['max'] }} {{ limits['hemoglobine']['unit'] }})
-                                    </small>
+                                </div>
                                 <input type="number" step="0.1" class="form-control"
-                                       placeholder="Valeur" name="hemoglobine"
+                                       placeholder="{{ limits['hemoglobine']['min'] }}-{{ limits['hemoglobine']['max'] }} {{ limits['hemoglobine']['unit'] }}" name="hemoglobine"
                                        value="{{ request.form.hemoglobine }}">
                             </div>
                             <div class="mb-3">
+                                <div class="d-flex flex-column align-items-center text-center">
                                     <label class="form-label mb-0">Hématocrite</label>
-                                    <small class="text-muted">
-                                        ({{ limits['hematocrite']['min'] }}-{{ limits['hematocrite']['max'] }} {{ limits['hematocrite']['unit'] }})
-                                    </small>
+                                </div>
                                 <input type="number" step="0.1" class="form-control"
-                                       placeholder="Valeur" name="hematocrite"
+                                       placeholder="{{ limits['hematocrite']['min'] }}-{{ limits['hematocrite']['max'] }} {{ limits['hematocrite']['unit'] }}" name="hematocrite"
                                        value="{{ request.form.hematocrite }}">
                             </div>
                             <div class="mb-3">
+                                <div class="d-flex flex-column align-items-center text-center">
                                     <label class="form-label mb-0">Leucocytes</label>
-                                    <small class="text-muted">
-                                        ({{ limits['globules_blancs']['min'] }}-{{ limits['globules_blancs']['max'] }} {{ limits['globules_blancs']['unit'] }})
-                                    </small>
+                                </div>
                                 <input type="number" class="form-control"
-                                       placeholder="Valeur" name="globules_blancs"
-                                       value="{{ request.form.c }}">
+                                       placeholder="{{ limits['globules_blancs']['min'] }}-{{ limits['globules_blancs']['max'] }} {{ limits['globules_blancs']['unit'] }}" name="globules_blancs"
+                                       value="{{ request.form.globules_blancs }}">
                             </div>
                             <div class="mb-3">
+                                <div class="d-flex flex-column align-items-center text-center">
                                     <label class="form-label mb-0">Hématies</label>
-                                    <small class="text-muted">
-                                        ({{ limits['globules_rouges']['min'] }}-{{ limits['globules_rouges']['max'] }} {{ limits['globules_rouges']['unit'] }}
-                                    </small>
+                                </div>
                                 <input type="number" class="form-control"
-                                       placeholder="Valeur" name="globules_rouges"
+                                       placeholder="{{ limits['globules_rouges']['min'] }}-{{ limits['globules_rouges']['max'] }} {{ limits['globules_rouges']['unit'] }}" name="globules_rouges"
                                        value="{{ request.form.globules_rouges }}">
                             </div>
                             <div class="mb-3">
+                                <div class="d-flex flex-column align-items-center text-center">
                                     <label class="form-label mb-0">Plaquettes</label>
-                                    <small class="text-muted">
-                                        ({{ limits['plaquettes']['min'] }}-{{ limits['plaquettes']['max'] }} {{ limits['plaquettes']['unit'] }})
-                                    </small>
+                                </div>
                                 <input type="number" class="form-control"
-                                       placeholder="Valeur" name="plaquettes"
+                                       placeholder="{{ limits['plaquettes']['min'] }}-{{ limits['plaquettes']['max'] }} {{ limits['plaquettes']['unit'] }}" name="plaquettes"
                                        value="{{ request.form.plaquettes }}">
                             </div>
                             <div class="mb-3">
+                                <div class="d-flex flex-column align-items-center text-center">
                                     <label class="form-label mb-0">Créatinine</label>
-                                    <small class="text-muted">
-                                        ({{ limits['creatinine']['min'] }}-{{ limits['creatinine']['max'] }} {{ limits['creatinine']['unit'] }})
-                                    </small>
+                                </div>
                                 <input type="number" step="0.1" class="form-control"
-                                       placeholder="Valeur" name="creatinine"
+                                       placeholder="{{ limits['creatinine']['min'] }}-{{ limits['creatinine']['max'] }} {{ limits['creatinine']['unit'] }}" name="creatinine"
                                        value="{{ request.form.creatinine }}">
                             </div>
                             <div class="mb-3">
+                                <div class="d-flex flex-column align-items-center text-center">
                                     <label class="form-label mb-0">Urée - Acide urique</label>
-                                    <small class="text-muted">
-                                        ({{ limits['uree']['min'] }}-{{ limits['uree']['max'] }} {{ limits['uree']['unit'] }})
-                                    </small>
+                                </div>
                                 <input type="number" class="form-control"
-                                       placeholder="Valeur" name="uree"
+                                       placeholder="{{ limits['uree']['min'] }}-{{ limits['uree']['max'] }} {{ limits['uree']['unit'] }}" name="uree"
                                        value="{{ request.form.uree }}">
                             </div>
                             <div class="mb-3">
+                                <div class="d-flex flex-column align-items-center text-center">
                                     <label class="form-label mb-0">Glycémie</label>
-                                    <small class="text-muted">
-                                        ({{ limits['glycemie']['min'] }}-{{ limits['glycemie']['max'] }} {{ limits['glycemie']['unit'] }})
-                                    </small>
+                                </div>
                                 <input type="number" step="0.01" class="form-control"
-                                       placeholder="Valeur" name="glycemie"
+                                       placeholder="{{ limits['glycemie']['min'] }}-{{ limits['glycemie']['max'] }} {{ limits['glycemie']['unit'] }}" name="glycemie"
                                        value="{{ request.form.glycemie }}">
                             </div>
                             <div class="mb-3">
+                                <div class="d-flex flex-column align-items-center text-center">
                                     <label class="form-label mb-0">Cholestérol Total</label>
-                                    <small class="text-muted">
-                                        ({{ limits['cholesterol_total']['min'] }}-{{ limits['cholesterol_total']['max'] }} {{ limits['cholesterol_total']['unit'] }})
-                                    </small>
+                                </div>
                                 <input type="number" step="0.01" class="form-control"
-                                       placeholder="Valeur" name="cholesterol_total"
+                                       placeholder="{{ limits['cholesterol_total']['min'] }}-{{ limits['cholesterol_total']['max'] }} {{ limits['cholesterol_total']['unit'] }}" name="cholesterol_total"
                                        value="{{ request.form.cholesterol_total }}">
                             </div>
                         </div>
@@ -108,85 +99,76 @@
                         <!-- Deuxième colonne -->
                         <div class="col-md-6">
                             <div class="mb-3">
+                                <div class="d-flex flex-column align-items-center text-center">
                                     <label class="form-label mb-0">HDL-Cholestérol</label>
-                                    <small class="text-muted">
-                                        ({{ limits['hdl']['min'] }}-{{ limits['hdl']['max'] }} {{ limits['hdl']['unit'] }})
-                                    </small>
+                                </div>
                                 <input type="number" step="0.01" class="form-control"
-                                       placeholder="Valeur" name="hdl"
+                                       placeholder="{{ limits['hdl']['min'] }}-{{ limits['hdl']['max'] }} {{ limits['hdl']['unit'] }}" name="hdl"
                                        value="{{ request.form.hdl }}">
                             </div>
                             <div class="mb-3">
+                                <div class="d-flex flex-column align-items-center text-center">
                                     <label class="form-label mb-0">LDL-Cholestérol</label>
-                                    <small class="text-muted">
-                                        ({{ limits['ldl']['min'] }}-{{ limits['ldl']['max'] }} {{ limits['ldl']['unit'] }})
-                                    </small>
+                                </div>
                                 <input type="number" step="0.01" class="form-control"
-                                       placeholder="Valeur"
+                                       placeholder="{{ limits['ldl']['min'] }}-{{ limits['ldl']['max'] }} {{ limits['ldl']['unit'] }}"
                                        name="ldl"
                                        value="{{ request.form.ldl }}">
                             </div>
                             <div class="mb-3">
+                                <div class="d-flex flex-column align-items-center text-center">
                                     <label class="form-label mb-0">Triglycérides</label>
-                                    <small class="text-muted">
-                                        ({{ limits['triglycerides']['min'] }}-{{ limits['triglycerides']['max'] }} {{ limits['triglycerides']['unit'] }})
-                                    </small>
+                                </div>
                                 <input type="number" step="0.01" class="form-control"
-                                       placeholder="Valeur" name="triglycerides"
+                                       placeholder="{{ limits['triglycerides']['min'] }}-{{ limits['triglycerides']['max'] }} {{ limits['triglycerides']['unit'] }}" name="triglycerides"
                                        value="{{ request.form.triglycerides }}">
                             </div>
                             <div class="mb-3">
+                                <div class="d-flex flex-column align-items-center text-center">
                                     <label class="form-label mb-0">TSH-Thyroïde</label>
-                                    <small class="text-muted">
-                                        ({{ limits['tsh']['min'] }}-{{ limits['tsh']['max'] }} {{ limits['tsh']['unit'] }})
-                                    </small>
+                                </div>
                                 <input type="number" step="0.01" class="form-control"
-                                       placeholder="Valeur" name="tsh"
+                                       placeholder="{{ limits['tsh']['min'] }}-{{ limits['tsh']['max'] }} {{ limits['tsh']['unit'] }}" name="tsh"
                                        value="{{ request.form.tsh }}">
                             </div>
                             <div class="mb-3">
+                                <div class="d-flex flex-column align-items-center text-center">
                                     <label class="form-label mb-0">PSA</label>
-                                    <small class="text-muted">
-                                        ({{ limits['psa']['min'] }}-{{ limits['psa']['max'] }} {{ limits['psa']['unit'] }})
-                                    </small>
+                                </div>
                                 <input type="number" step="0.01" class="form-control"
-                                       placeholder="Valeur" name="psa"
+                                       placeholder="{{ limits['psa']['min'] }}-{{ limits['psa']['max'] }} {{ limits['psa']['unit'] }}" name="psa"
                                        value="{{ request.form.psa }}">
                             </div>
                             <div class="mb-3">
+                                <div class="d-flex flex-column align-items-center text-center">
                                     <label class="form-label mb-0">ALT - SGPT</label>
-                                    <small class="text-muted">
-                                        ({{ limits['alt']['min'] }}-{{ limits['alt']['max'] }} {{ limits['alt']['unit'] }})
-                                    </small>
+                                </div>
                                 <input type="number" class="form-control"
-                                       placeholder="Valeur" name="alt"
+                                       placeholder="{{ limits['alt']['min'] }}-{{ limits['alt']['max'] }} {{ limits['alt']['unit'] }}" name="alt"
                                        value="{{ request.form.alt }}">
                             </div>
                             <div class="mb-3">
+                                <div class="d-flex flex-column align-items-center text-center">
                                     <label class="form-label mb-0">AST - SGOT</label>
-                                    <small class="text-muted">
-                                        ({{ limits['ast']['min'] }}-{{ limits['ast']['max'] }} {{ limits['ast']['unit'] }})
-                                    </small>
+                                </div>
                                 <input type="number" class="form-control"
-                                       placeholder="Valeur" name="ast"
+                                       placeholder="{{ limits['ast']['min'] }}-{{ limits['ast']['max'] }} {{ limits['ast']['unit'] }}" name="ast"
                                        value="{{ request.form.ast }}">
                             </div>
                             <div class="mb-3">
+                                <div class="d-flex flex-column align-items-center text-center">
                                     <label class="form-label mb-0">Fer</label>
-                                    <small class="text-muted">
-                                        ({{ limits['fer']['min'] }}-{{ limits['fer']['max'] }} {{ limits['fer']['unit'] }})
-                                    </small>
+                                </div>
                                 <input type="number" step="0.1" class="form-control"
-                                       placeholder="Valeur" name="fer"
+                                       placeholder="{{ limits['fer']['min'] }}-{{ limits['fer']['max'] }} {{ limits['fer']['unit'] }}" name="fer"
                                        value="{{ request.form.fer }}">
                             </div>
                             <div class="mb-3">
+                                <div class="d-flex flex-column align-items-center text-center">
                                     <label class="form-label mb-0">Vitamine D</label>
-                                    <small class="text-muted">
-                                        ({{ limits['vitamine_d']['min'] }}-{{ limits['vitamine_d']['max'] }} {{ limits['vitamine_d']['unit'] }})
-                                    </small>
+                                </div>
                                 <input type="number" step="0.1" class="form-control"
-                                       placeholder="Valeur" name="vitamine_d"
+                                       placeholder="{{ limits['vitamine_d']['min'] }}-{{ limits['vitamine_d']['max'] }} {{ limits['vitamine_d']['unit'] }}" name="vitamine_d"
                                        value="{{ request.form.vitamine_d }}">
                             </div>
                         </div>
