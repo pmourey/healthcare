@@ -6,7 +6,7 @@
 {% block main %}
 <main>
     <h2>Sélection marqueurs</h2>
-<!--    <script src="{{ url_for('static', filename='js/patient_report.js') }}"></script>-->
+    <script src="{{ url_for('static', filename='js/select_markers.js') }}"></script>
         <form action="{{ url_for('generate_graphs') }}" method="post">
             <!-- Ajout du champ caché pour l'ID du patient -->
             <input type="hidden" name="patient_id" value="{{ patient.id }}">
@@ -24,14 +24,7 @@
                                         <input type="checkbox" class="form-check-input me-2" id="select_all_health"
                                                onclick="toggleHealthChecks(this, true)">
                                         <label class="form-check-label" for="select_all_health">
-                                            <strong>Sélectionner tout</strong>
-                                        </label>
-                                    </div>
-                                    <div class="form-check d-flex align-items-center">
-                                        <input type="checkbox" class="form-check-input me-2" id="deselect_all_health"
-                                               onclick="toggleHealthChecks(this, false)">
-                                        <label class="form-check-label" for="deselect_all_health">
-                                            <strong>Désélectionner tout</strong>
+                                            <strong>Sélectionner/Désélectionner Tout</strong>
                                         </label>
                                     </div>
                                 </div>
@@ -74,14 +67,7 @@
                                         <input type="checkbox" class="form-check-input me-2" id="select_all_blood"
                                                onclick="toggleBloodChecks(this, true)">
                                         <label class="form-check-label" for="select_all_blood">
-                                            <strong>Sélectionner tout</strong>
-                                        </label>
-                                    </div>
-                                    <div class="form-check d-flex align-items-center">
-                                        <input type="checkbox" class="form-check-input me-2" id="deselect_all_blood"
-                                               onclick="toggleBloodChecks(this, false)">
-                                        <label class="form-check-label" for="deselect_all_blood">
-                                            <strong>Désélectionner tout</strong>
+                                            <strong>Sélectionner/Désélectionner Tout</strong>
                                         </label>
                                     </div>
                                 </div>
