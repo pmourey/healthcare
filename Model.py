@@ -23,6 +23,7 @@ class Role(Enum):
 	EDITOR = 1
 	READER = 2
 
+
 class HealthData(db.Model):
 	__tablename__ = 'health_data'
 	id = Column(Integer, primary_key=True)
@@ -42,6 +43,7 @@ class HealthData(db.Model):
 	def imc(self) -> float:
 		return round(self.weight / ((self.height / 100) ** 2), 1)
 
+
 class Patient(db.Model):
 	__tablename__ = 'patients'
 	id = Column(Integer, primary_key=True)
@@ -56,12 +58,13 @@ class Patient(db.Model):
 	health_data = relationship('HealthData', backref='patient', cascade='all, delete-orphan')
 	blood_data = relationship('AnalyseSanguine', backref='patient', cascade='all, delete-orphan')
 
+
 class AnalyseSanguine(db.Model):
 	__tablename__ = 'analyses'
 	id = Column(Integer, primary_key=True)
 	patient_id = Column(Integer, ForeignKey('patients.id'))
 	# date_analyse = Column(DateTime, default=datetime.now)
-	date_analyse = Column(DateTime, nullable = False)
+	date_analyse = Column(DateTime, nullable=False)
 
 	# Marqueurs biologiques
 	hemoglobine = Column(Float)  # g/dL
@@ -82,6 +85,7 @@ class AnalyseSanguine(db.Model):
 	ast = Column(Integer)  # UI/L
 	fer = Column(Float)  # µg/dL
 	vitamine_d = Column(Integer)  # ng/mL
+
 
 class User(db.Model):
 	__tablename__ = 'user'
@@ -157,6 +161,14 @@ class Session(db.Model):
 	browser_version = Column(String(10), nullable=False)
 	login_id = Column(Integer, ForeignKey('user.id'), nullable=False)
 
+	def __init__(self, login_id: int, start: DateTime, client_ip: str, browser_family: str, browser_version: str):
+		self.login_id = login_id
+		self.start = start
+		self.end = None
+		self.client_ip = client_ip
+		self.browser_family = browser_family
+		self.browser_version = browser_version
+
 	def __repr__(self):
 		user: User = User.query.get(self.login_id)
 		if not self.end:
@@ -168,10 +180,16 @@ class Session(db.Model):
 	def username(self) -> str:
 		return User.query.get(self.login_id).username
 
-	def __init__(self, login_id: int, start: DateTime, client_ip: str, browser_family: str, browser_version: str):
-		self.login_id = login_id
-		self.start = start
-		self.end = None
-		self.client_ip = client_ip
-		self.browser_family = browser_family
-		self.browser_version = browser_version
+	@property
+	def is_valid(self) -> bool:
+		# Query to find the latest active session with the same characteristics
+		latest_session = Session.query.filter(Session.client_ip == self.client_ip,
+											  Session.browser_family == self.browser_family,
+											  Session.browser_version == self.browser_version,
+											  Session.login_id == self.login_id,
+											  Session.end.is_(None)  # Check for active sessions only
+											  ).order_by(Session.start.desc()).first()
+
+		# Check if this session is the latest active one
+		return latest_session and latest_session.id == self.id
+

@@ -45,35 +45,37 @@
                             </thead>
                             <tbody>
                                 {% for session in sessions %}
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <i class="bi bi-person-circle text-primary me-2"></i>
-                                            {{ session.username }}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <i class="bi bi-clock text-secondary me-2"></i>
-                                            {{ session.start|format_paris_time }}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <i class="bi bi-globe text-info me-2"></i>
-                                            {{ session.browser_family }}
-                                            <span class="badge bg-secondary ms-2">
-                                                version {{ session.browser_version }}
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <i class="bi bi-pc-display text-success me-2"></i>
-                                            {{ session.client_ip }}
-                                        </div>
-                                    </td>
-                                </tr>
+                                    {% if session.is_valid %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi bi-person-circle text-primary me-2"></i>
+                                                    {{ session.username }}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi bi-clock text-secondary me-2"></i>
+                                                    {{ session.start|format_paris_time }}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi bi-globe text-info me-2"></i>
+                                                    {{ session.browser_family }}
+                                                    <span class="badge bg-secondary ms-2">
+                                                        version {{ session.browser_version }}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi bi-pc-display text-success me-2"></i>
+                                                    {{ session.client_ip }}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
                                 {% endfor %}
                             </tbody>
                         </table>
