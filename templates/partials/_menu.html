@@ -29,7 +29,7 @@
                 </li>
 
                 <!-- Retour liste patients (conditionnel) -->
-                {% if request.endpoint in ('show_health_data', 'new_health_data', 'patient_report') %}
+                {% if request.endpoint in ('show_health_data', 'show_blood_data', 'new_health_data', 'new_blood_data', 'select_markers', 'patient_report') %}
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center" href="{{ url_for('show_patients') }}">
                         <i class="bi bi-people me-2"></i>
