@@ -21,6 +21,7 @@
                             {% endif %}
                             <th scope="col">Login</th>
                             <th scope="col">Date création</th>
+                            <th scope="col">Dernière connexion</th>
                             <th scope="col">Type</th>
                         </tr>
                     </thead>
@@ -55,6 +56,11 @@
                                 <div class="d-flex align-items-center">
                                     <i class="bi bi-calendar-event text-secondary me-2"></i>
                                     {{ account.creationDate|format_paris_time }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {{ account.status }}
                                 </div>
                             </td>
                             <td>

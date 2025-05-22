@@ -100,6 +100,7 @@ class User(db.Model):
 	validated = Column(Boolean, default=False)
 
 	patients = relationship('Patient', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+	sessions = relationship('Session', backref='user', lazy='dynamic')
 
 	def __repr__(self):
 		return f'{self.username}:{self.password} ({Role(self.role)})'
@@ -143,6 +144,39 @@ class User(db.Model):
 	@property
 	def is_reader(self):
 		return Role(self.role) == Role.READER
+
+	@property
+	def status(self) -> str:
+		# Get the latest session for this user
+		latest_session = Session.query.filter(Session.login_id == self.id).order_by(Session.start.desc()).first()
+
+		if not latest_session:
+			return "Never connected"
+
+		if latest_session.end is None:
+			# Active session - show how long they've been connected
+			delta = relativedelta(datetime.now(), latest_session.start)
+
+			if delta.days > 0:
+				return f'Connected for {delta.days} days'
+			elif delta.hours > 0:
+				return f'Connected for {delta.hours} hours'
+			elif delta.minutes > 0:
+				return f'Connected for {delta.minutes} minutes'
+			else:
+				return f'Connected for {delta.seconds} seconds'
+		else:
+			# Ended session - show how long ago they disconnected
+			delta = relativedelta(datetime.now(), latest_session.end)
+
+			if delta.days > 0:
+				return f'Last seen {delta.days} days ago'
+			elif delta.hours > 0:
+				return f'Last seen {delta.hours} hours ago'
+			elif delta.minutes > 0:
+				return f'Last seen {delta.minutes} minutes ago'
+			else:
+				return f'Last seen {delta.seconds} seconds ago'
 
 
 @dataclass
