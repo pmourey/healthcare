@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+{% from "./partials/_macros.html" import display_value %}
+
 <html>
 <head>
     <style>
@@ -27,84 +29,82 @@
     </style>
 </head>
 
-{% import './partials/_macros.html' as macros %}
-
 <body>
     <h2>Analyse(s) sanguine(s) - {{ patient.first_name }} {{ patient.last_name }}</h2>
     {% for data in reports|sort(attribute='date_analyse', reverse=true) %}
     <h3>Analyse du {{ data.date_analyse.strftime('%A %d %B %Y à %Hh%M') }}</h3>
     <table>
         <tr>
-            <th>Hémoglobine (g/dL)</th>
-            {{ macros.display_value(data, 'hemoglobine') }}
+            <th>Hémoglobine</th>
+            {{ display_value(data.hemoglobine, 'hemoglobine', limits) }}
         </tr>
         <tr>
-            <th>Hématocrite (%)</th>
-            {{ macros.display_value(data, 'hematocrite') }}
+            <th>Hématocrite</th>
+            {{ display_value(data.hematocrite, 'hematocrite', limits) }}
         </tr>
         <tr>
-            <th>Leucocytes (/mm3)</th>
-            {{ macros.display_value(data, 'globules_blancs') }}
+            <th>Leucocytes</th>
+            {{ display_value(data.globules_blancs, 'globules_blancs', limits) }}
         </tr>
         <tr>
-            <th>Hématies (/mm3)</th>
-            {{ macros.display_value(data, 'globules_rouges') }}
+            <th>Hématies</th>
+            {{ display_value(data.globules_rouges, 'globules_rouges', limits) }}
         </tr>
         <tr>
-            <th>Plaquettes (/mm3)</th>
-            {{ macros.display_value(data, 'plaquettes') }}
+            <th>Plaquettes</th>
+            {{ display_value(data.plaquettes, 'plaquettes', limits) }}
         </tr>
         <tr>
-            <th>Créatinine (mg/L)</th>
-            {{ macros.display_value(data, 'creatinine') }}
+            <th>Créatinine</th>
+            {{ display_value(data.creatinine, 'creatinine', limits) }}
         </tr>
         <tr>
-            <th>Urée (mg/L)</th>
-            {{ macros.display_value(data, 'uree') }}
+            <th>Urée</th>
+            {{ display_value(data.uree, 'uree', limits) }}
         </tr>
         <tr>
-            <th>Glycémie (g/L)</th>
-            {{ macros.display_value(data, 'glycemie') }}
+            <th>Glycémie</th>
+            {{ display_value(data.glycemie, 'glycemie', limits) }}
         </tr>
         <tr>
-            <th>Cholestérol Total (g/L)</th>
-            {{ macros.display_value(data, 'cholesterol_total') }}
+            <th>Cholestérol Total</th>
+            {{ display_value(data.cholesterol_total, 'cholesterol_total', limits) }}
         </tr>
         <tr>
-            <th>HDL (g/L)</th>
-            {{ macros.display_value(data, 'hdl') }}
+            <th>HDL</th>
+            {{ display_value(data.hdl, 'hdl', limits) }}
         </tr>
         <tr>
-            <th>LDL (g/L)</th>
-            {{ macros.display_value(data, 'ldl') }}
+            <th>LDL</th>
+            {{ display_value(data.ldl, 'ldl', limits) }}
         </tr>
         <tr>
-            <th>Triglycérides (g/L)</th>
-            {{ macros.display_value(data, 'triglycerides') }}
+            <th>Triglycérides</th>
+            {{ display_value(data.triglycerides, 'triglycerides', limits) }}
         </tr>
         <tr>
-            <th>TSH (mUI/L)</th>
-            {{ macros.display_value(data, 'tsh') }}
+            <th>TSH</th>
+            {{ display_value(data.tsh, 'tsh', limits) }}
         </tr>
         <tr>
-            <th>PSA (ng/mL)</th>
-            {{ macros.display_value(data, 'psa') }}
+            <th>PSA</th>
+            {{ display_value(data.psa, 'psa', limits) }}
         </tr>
         <tr>
-            <th>ALT (UI/L)</th>
-            {{ macros.display_value(data, 'alt') }}
+            <th>ALT</th>
+            {{ display_value(data.alt, 'alt', limits) }}
         </tr>
         <tr>
-            <th>AST (UI/L)</th>
-            {{ macros.display_value(data, 'ast') }}
+            <th>AST</th>
+            {{ display_value(data.ast, 'ast', limits) }}
         </tr>
         <tr>
-            <th>Fer (µg/dL)</th>
-            {{ macros.display_value(data, 'fer') }}
+            <th>Fer</th>
+            {{ display_value(data.fer, 'fer', limits) }}
         </tr>
         <tr>
-            <th>Vitamine D (ng/mL)</th>
-            {{ macros.display_value(data, 'vitamine_d') }}
+            <th>Vitamine D</th>
+            {{ display_value(data.vitamine_d, 'vitamine_d', limits) }}
         </tr>
     </table>
     {% endfor %}

@@ -1,0 +1,19 @@
+{% macro display_value(data, marker, medical_limits) %}
+    {# Get the limits for the marker #}
+    {% set limits = medical_limits.get(marker, {}) %}
+    {% set min_val = limits.get('min') %}
+    {% set max_val = limits.get('max') %}
+    {% set unit = limits.get('unit', '') %}
+
+    {% if data is none %}
+        <span class="text-muted">N/A</span>
+    {% else %}
+        {% set value = data|float %}
+        {# Check if value is outside limits #}
+        {% if value < min_val or value > max_val %}
+            <strong class="text-danger">{{ value }}{% if unit %} {{ unit }}{% endif %}</strong>
+        {% else %}
+            {{ value }}{% if unit %} {{ unit }}{% endif %}
+        {% endif %}
+    {% endif %}
+{% endmacro %}

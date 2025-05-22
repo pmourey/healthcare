@@ -564,8 +564,7 @@ def new_blood_data(id: int):
 @is_connected
 def show_blood_data(id: int):
 	patient = Patient.query.get_or_404(id)
-	thresholds = {'hemoglobine': {'min': 13.0, 'max': 18.0, 'unit': 'g/dL'}, 'hematocrite': {'min': 37.0, 'max': 50.0, 'unit': '%'}, 'globules_blancs': {'min': 4000, 'max': 11000, 'unit': '/mm³'}, 'globules_rouges': {'min': 4.6e6, 'max': 6.2e6, 'unit': '/mm³'}, 'plaquettes': {'min': 150000, 'max': 400000, 'unit': '/mm³'}, 'creatinine': {'min': 7.2, 'max': 11.8, 'unit': 'mg/L'}, 'uree': {'min': 35, 'max': 72, 'unit': 'mg/L'}, 'glycemie': {'min': 0.74, 'max': 1.06, 'unit': 'g/L'}, 'cholesterol_total': {'min': 0, 'max': 2, 'unit': 'g/L'}, 'hdl': {'min': 0.4, 'max': 0.6, 'unit': 'g/L'}, 'ldl': {'min': 0, 'max': 1.30, 'unit': 'g/L'}, 'triglycerides': {'min': 0, 'max': 1.5, 'unit': 'g/L'}, 'tsh': {'min': 0.38, 'max': 5.33, 'unit': 'mUI/L'}, 'psa': {'min': 0, 'max': 4.0, 'unit': 'ng/mL'}, 'alt': {'min': 7, 'max': 50, 'unit': 'UI/L'}, 'ast': {'min': 8, 'max': 50, 'unit': 'UI/L'}, 'fer': {'min': 60, 'max': 170, 'unit': 'µg/dL'}, 'vitamine_d': {'min': 30, 'max': 100, 'unit': 'ng/mL'}}
-	return render_template('patient_blood_data.html', patient=patient, thresholds=thresholds)
+	return render_template('patient_blood_data.html', patient=patient, limits=app.config['LIMITS'])
 
 
 @app.route('/show_patients')
@@ -616,7 +615,7 @@ def send_blood_reports(patient_id):
 	user: User = get_user_by_id(session['login_id'])
 	# Fetch the selected reports
 	reports = AnalyseSanguine.query.filter(AnalyseSanguine.id.in_(selected_reports)).all()
-	if send_email(subject=f'Analyses de sang - {patient.first_name} {patient.last_name}', body=render_template('email/blood_report.html', patient=patient, reports=reports), sender_email=user.email, recipient_email=patient.email, bcc_recipients=[], smtp_server=app.config['SMTP_SERVER'], smtp_port=app.config['SMTP_PORT'], username=app.config['GMAIL_USER'], password=app.config['GMAIL_APP_PWD'], author=app.config['GMAIL_FULLNAME']):
+	if send_email(subject=f'Analyses de sang - {patient.first_name} {patient.last_name}', body=render_template('email/blood_report.html', patient=patient, reports=reports, limits=app.config['LIMITS']), sender_email=user.email, recipient_email=patient.email, bcc_recipients=[], smtp_server=app.config['SMTP_SERVER'], smtp_port=app.config['SMTP_PORT'], username=app.config['GMAIL_USER'], password=app.config['GMAIL_APP_PWD'], author=app.config['GMAIL_FULLNAME']):
 
 		flash('Rapports envoyés avec succès', 'success')
 	else:
@@ -773,67 +772,6 @@ def generate_graphs():
 
 	# Conversion des données en format JSON-compatible
 	return render_template('patient_report.html', patient=patient, today=datetime.now().strftime('%d/%m/%Y'), health_data=selected_health_data, blood_data=selected_blood_data, selected_health_markers=health_markers, selected_blood_markers=blood_markers)
-
-
-def generate_graphs_ori():
-	patient = Patient.query.get_or_404(request.form.get('patient_id'))
-	health_markers = request.form.getlist('health_markers')
-	blood_markers = request.form.getlist('blood_markers')
-	app.logger.debug(f'health_markers: {health_markers}')
-	app.logger.debug(f'blood_markers: {blood_markers}')
-
-	# Récupération des données
-	health_data = HealthData.query.filter_by(patient_id=patient.id).order_by(HealthData.creation_date).all()
-	blood_data = AnalyseSanguine.query.filter_by(patient_id=patient.id).order_by(AnalyseSanguine.date_analyse).all()
-
-	# Dictionnaires pour stocker les données sélectionnées
-	selected_health_data = {'dates': [data.creation_date.strftime('%d/%m/%Y') for data in health_data], 'markers': {}}
-
-	selected_blood_data = {'dates': [data.date_analyse.strftime('%d/%m/%Y') for data in blood_data], 'markers': {}}
-
-	# Mapping des marqueurs de santé selon le template
-	health_marker_mapping = {'weight': ('weight', 'Poids'), 'height': ('height', 'Taille'), 'temperature': ('temperature', 'Température'), 'systolic_bp': ('blood_pressure_sys', 'Tension systolique'), 'diastolic_bp': ('blood_pressure_dia', 'Tension diastolique'), 'heart_rate': ('heart_rate', 'Fréquence cardiaque')}
-
-	# Mapping des marqueurs sanguins selon le template
-	blood_marker_mapping = {'hemoglobine': ('hemoglobine', 'Hémoglobine'), 'hematocrite': ('hematocrite', 'Hématocrite'), 'globules_blancs': ('globules_blancs', 'Globules blancs'), 'globules_rouges': ('globules_rouges', 'Globules rouges'), 'plaquettes': ('plaquettes', 'Plaquettes'), 'creatinine': ('creatinine', 'Créatinine'), 'uree': ('uree', 'Urée'), 'glycemie': ('glycemie', 'Glycémie'), 'cholesterol_total': ('cholesterol_total', 'Cholestérol total'), 'hdl': ('hdl', 'HDL'), 'ldl': ('ldl', 'LDL'), 'triglycerides': ('triglycerides', 'Triglycérides'), 'tsh': ('tsh', 'TSH'), 'psa': ('psa', 'PSA'), 'alt': ('alt', 'ALT'), 'ast': ('ast', 'AST'), 'fer': ('fer', 'Fer'), 'vitamine_d': ('vitamine_d', 'Vitamine D')}
-
-	# Unités pour chaque marqueur
-	marker_units = {'weight': 'kg', 'height': 'cm', 'temperature': '°C', 'systolic_bp': 'mmHg', 'diastolic_bp': 'mmHg', 'heart_rate': 'bpm', 'hemoglobine': 'g/dL', 'hematocrite': '%', 'globules_blancs': '/mm³', 'globules_rouges': '/mm³', 'plaquettes': '/mm³', 'creatinine': 'mg/L', 'uree': 'mg/L', 'glycemie': 'g/L', 'cholesterol_total': 'g/L', 'hdl': 'g/L', 'ldl': 'g/L', 'triglycerides': 'g/L', 'tsh': 'mUI/L', 'psa': 'ng/mL', 'alt': 'UI/L', 'ast': 'UI/L', 'fer': 'µg/dL', 'vitamine_d': 'ng/mL'}
-
-	# Récupération des données de santé sélectionnées
-	for marker in health_markers:
-		if marker in health_marker_mapping:
-			attr_name, display_name = health_marker_mapping[marker]
-			# Conversion des valeurs en float pour assurer la sérialisation JSON
-			values = []
-			for data in health_data:
-				value = getattr(data, attr_name)
-				# Convertir None ou les valeurs non-numériques en None
-				try:
-					values.append(float(value) if value is not None else None)
-				except (ValueError, TypeError):
-					values.append(None)
-
-			selected_health_data['markers'][marker] = {'values': values, 'display_name': display_name, 'unit': marker_units.get(marker, '')}
-
-	# Récupération des données sanguines sélectionnées
-	for marker in blood_markers:
-		if marker in blood_marker_mapping:
-			attr_name, display_name = blood_marker_mapping[marker]
-			# Conversion des valeurs en float pour assurer la sérialisation JSON
-			values = []
-			for data in blood_data:
-				value = getattr(data, attr_name)
-				# Convertir None ou les valeurs non-numériques en None
-				try:
-					values.append(float(value) if value is not None else None)
-				except (ValueError, TypeError):
-					values.append(None)
-
-			selected_blood_data['markers'][marker] = {'values': values, 'display_name': display_name, 'unit': marker_units.get(marker, '')}
-
-	return render_template('patient_report.html', patient=patient, today=datetime.now(),  # Formatage de la date
-						   health_data=selected_health_data, blood_data=selected_blood_data, selected_health_markers=health_markers, selected_blood_markers=blood_markers)
 
 
 @app.before_request

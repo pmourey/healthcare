@@ -2,7 +2,7 @@
 
 {% extends 'base.html' %}
 {% include './partials/_menu.html' %}
-{% import './partials/_macros.html' as macros %}
+{% from "./partials/_macros.html" import display_value %}
 
 {% block main %}
 <main>
@@ -104,24 +104,24 @@
                                     </div>
                                 </td>
                                 <td>{{ data.date_analyse.strftime('%d/%m/%Y') }}</td>
-                                <td>{{ "%.1f"|format(data.hemoglobine) if data.hemoglobine }}</td>
-                                <td>{{ "%.1f"|format(data.hematocrite) if data.hematocrite }}</td>
-                                <td>{{ data.globules_blancs }}</td>
-                                <td>{{ data.globules_rouges }}</td>
-                                <td>{{ data.plaquettes }}</td>
-                                <td>{{ "%.1f"|format(data.creatinine) if data.creatinine }}</td>
-                                <td>{{ data.uree }}</td>
-                                <td>{{ "%.2f"|format(data.glycemie) if data.glycemie }}</td>
-                                <td>{{ "%.2f"|format(data.cholesterol_total) if data.cholesterol_total }}</td>
-                                <td>{{ "%.2f"|format(data.hdl) if data.hdl }}</td>
-                                <td>{{ "%.2f"|format(data.ldl) if data.ldl }}</td>
-                                <td>{{ "%.2f"|format(data.triglycerides) if data.triglycerides }}</td>
-                                <td>{{ "%.2f"|format(data.tsh) if data.tsh }}</td>
-                                <td>{{ "%.2f"|format(data.psa) if data.psa }}</td>
-                                <td>{{ data.alt }}</td>
-                                <td>{{ data.ast }}</td>
-                                <td>{{ "%.1f"|format(data.fer) if data.fer }}</td>
-                                <td>{{ "%.1f"|format(data.vitamine_d) if data.vitamine_d }}</td>
+                                <td>{{ display_value(data.hemoglobine, 'hemoglobine', limits) }}</td>
+                                <td>{{ display_value(data.hematocrite, 'hematocrite', limits) }}</td>
+                                <td>{{ display_value(data.globules_blancs, 'globules_blancs', limits) }}</td>
+                                <td>{{ display_value(data.globules_rouges, 'globules_rouges', limits) }}</td>
+                                <td>{{ display_value(data.plaquettes, 'plaquettes', limits) }}</td>
+                                <td>{{ display_value(data.creatinine, 'creatinine', limits) }}</td>
+                                <td>{{ display_value(data.uree, 'uree', limits) }}</td>
+                                <td>{{ display_value(data.glycemie, 'glycemie', limits) }}</td>
+                                <td>{{ display_value(data.cholesterol_total, 'cholesterol_total', limits) }}</td>
+                                <td>{{ display_value(data.hdl, 'hdl', limits) }}</td>
+                                <td>{{ display_value(data.ldl, 'ldl', limits) }}</td>
+                                <td>{{ display_value(data.triglycerides, 'triglycerides', limits) }}</td>
+                                <td>{{ display_value(data.tsh, 'tsh', limits) }}</td>
+                                <td>{{ display_value(data.psa, 'psa', limits) }}</td>
+                                <td>{{ display_value(data.alt, 'plaquettes', limits) }}</td>
+                                <td>{{ display_value(data.ast, 'ast', limits) }}</td>
+                                <td>{{ display_value(data.fer, 'fer', limits) }}</td>
+                                <td>{{ display_value(data.vitamine_d, 'vitamine_d', limits) }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
