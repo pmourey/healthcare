@@ -21,7 +21,7 @@ from pytz import timezone
 from sqlalchemy import desc
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from Controller import get_user_by_id, check, send_confirmation_email, send_password_recovery_email, get_session_by_login, validate_password_complexity
+from Controller import get_user_by_id, check, send_confirmation_email, send_password_recovery_email, get_session_by_login, validate_password_complexity, end_other_sessions
 from Model import User, db, Session, Patient, HealthData, AnalyseSanguine
 
 import secrets
@@ -186,6 +186,8 @@ def login():
 				sess = Session(login_id=user.id, start=datetime.now(), client_ip=client_ip, browser_family=user_agent.browser.family, browser_version=user_agent.browser.version_string)
 				db.session.add(sess)
 				db.session.commit()
+				# End other active sessions for this user
+				end_other_sessions(user.id, sess.id)
 				return redirect(url_for('welcome'))
 			else:
 				error = 'Your account is not yet validated! Please check your email for the confirmation link.'

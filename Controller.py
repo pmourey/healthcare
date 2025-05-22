@@ -105,56 +105,72 @@ def validate_password_complexity_old(password):
 
 
 def validate_password_complexity(password):
-    """
-    Validates password against security requirements for healthcare systems.
-    Returns (bool, str) tuple - (is_valid, error_message)
-    """
-    # # Liste des règles pour affichage
-    # password_rules = [
-    #     "Au moins 10 caractères",
-    #     "Au moins une lettre majuscule",
-    #     "Au moins une lettre minuscule",
-    #     "Au moins un chiffre",
-    #     "Au moins un caractère spécial (!@#$%^&*(),.?\":{}|<>)",
-    #     "Pas de motifs communs (password, 123456, qwerty, admin)",
-    #     "Pas de caractères répétés plus de deux fois"
-    # ]
+	"""
+	Validates password against security requirements for healthcare systems.
+	Returns (bool, str) tuple - (is_valid, error_message)
+	"""
+	# # Liste des règles pour affichage
+	# password_rules = [
+	#     "Au moins 10 caractères",
+	#     "Au moins une lettre majuscule",
+	#     "Au moins une lettre minuscule",
+	#     "Au moins un chiffre",
+	#     "Au moins un caractère spécial (!@#$%^&*(),.?\":{}|<>)",
+	#     "Pas de motifs communs (password, 123456, qwerty, admin)",
+	#     "Pas de caractères répétés plus de deux fois"
+	# ]
 
-    # # Afficher les règles avec flash
-    # flash("Règles de sécurité du mot de passe:", "info")
-    # for rule in password_rules:
-    #     flash(f"• {rule}", "info")
+	# # Afficher les règles avec flash
+	# flash("Règles de sécurité du mot de passe:", "info")
+	# for rule in password_rules:
+	#     flash(f"• {rule}", "info")
 
-    # Validation
-    if len(password) < 10:
-        # flash("Erreur: Le mot de passe doit contenir au moins 10 caractères", "error")
-        return False, "Password must be at least 10 characters long"
+	# Validation
+	if len(password) < 10:
+		# flash("Erreur: Le mot de passe doit contenir au moins 10 caractères", "error")
+		return False, "Password must be at least 10 characters long"
 
-    if not re.search(r'[A-Z]', password):
-        # flash("Erreur: Le mot de passe doit contenir au moins une majuscule", "error")
-        return False, "Password must contain at least one uppercase letter"
+	if not re.search(r'[A-Z]', password):
+		# flash("Erreur: Le mot de passe doit contenir au moins une majuscule", "error")
+		return False, "Password must contain at least one uppercase letter"
 
-    if not re.search(r'[a-z]', password):
-        # flash("Erreur: Le mot de passe doit contenir au moins une minuscule", "error")
-        return False, "Password must contain at least one lowercase letter"
+	if not re.search(r'[a-z]', password):
+		# flash("Erreur: Le mot de passe doit contenir au moins une minuscule", "error")
+		return False, "Password must contain at least one lowercase letter"
 
-    if not re.search(r'\d', password):
-        # flash("Erreur: Le mot de passe doit contenir au moins un chiffre", "error")
-        return False, "Password must contain at least one number"
+	if not re.search(r'\d', password):
+		# flash("Erreur: Le mot de passe doit contenir au moins un chiffre", "error")
+		return False, "Password must contain at least one number"
 
-    if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
-        # flash("Erreur: Le mot de passe doit contenir au moins un caractère spécial", "error")
-        return False, "Password must contain at least one special character"
+	if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+		# flash("Erreur: Le mot de passe doit contenir au moins un caractère spécial", "error")
+		return False, "Password must contain at least one special character"
 
-    common_patterns = ['password', '123456', 'qwerty', 'admin']
-    if any(pattern in password.lower() for pattern in common_patterns):
-        # flash("Erreur: Le mot de passe contient des motifs interdits", "error")
-        return False, "Password contains common patterns that are not allowed"
+	common_patterns = ['password', '123456', 'qwerty', 'admin']
+	if any(pattern in password.lower() for pattern in common_patterns):
+		# flash("Erreur: Le mot de passe contient des motifs interdits", "error")
+		return False, "Password contains common patterns that are not allowed"
 
-    if re.search(r'(.)\1{2,}', password):
-        # flash("Erreur: Le mot de passe ne peut pas contenir de caractères répétés plus de deux fois", "error")
-        return False, "Password cannot contain characters repeating more than twice"
+	if re.search(r'(.)\1{2,}', password):
+		# flash("Erreur: Le mot de passe ne peut pas contenir de caractères répétés plus de deux fois", "error")
+		return False, "Password cannot contain characters repeating more than twice"
 
-    flash("Le mot de passe respecte toutes les règles de sécurité", "success")
-    return True, "Password meets security requirements"
+	flash("Le mot de passe respecte toutes les règles de sécurité", "success")
+	return True, "Password meets security requirements"
 
+
+def end_other_sessions(user_id: int, current_session_id: int = None) -> None:
+	"""
+	Termine toutes les autres sessions actives d'un utilisateur
+	excepté la session courante si spécifiée
+	"""
+	query = Session.query.filter(Session.login_id == user_id, Session.end.is_(None)) # Sessions actives uniquement
+
+	# Si une session courante est spécifiée, on l'exclut
+	if current_session_id:
+		query = query.filter(Session.id != current_session_id)
+
+	# Met à jour toutes les autres sessions avec une date de fin
+	query.update({Session.end: datetime.now()}, synchronize_session=False)
+
+	db.session.commit()
