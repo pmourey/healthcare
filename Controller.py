@@ -174,3 +174,18 @@ def end_other_sessions(user_id: int, current_session_id: int = None) -> None:
 	query.update({Session.end: datetime.now()}, synchronize_session=False)
 
 	db.session.commit()
+
+
+# Helper function to safely convert values
+def safe_float(value, default=None):
+	try:
+		return float(value) if value.strip() else default
+	except (ValueError, AttributeError):
+		return default
+
+
+def safe_int(value, default=None):
+	try:
+		return int(value) if value.strip() else default
+	except (ValueError, AttributeError):
+		return default

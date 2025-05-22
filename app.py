@@ -21,7 +21,7 @@ from pytz import timezone
 from sqlalchemy import desc
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from Controller import get_user_by_id, check, send_confirmation_email, send_password_recovery_email, get_session_by_login, validate_password_complexity, end_other_sessions
+from Controller import get_user_by_id, check, send_confirmation_email, send_password_recovery_email, get_session_by_login, validate_password_complexity, end_other_sessions, safe_float, safe_int
 from Model import User, db, Session, Patient, HealthData, AnalyseSanguine
 
 import secrets
@@ -448,25 +448,29 @@ def new_patient():
 @app.route('/new_health_data/<int:id>', methods=['GET', 'POST'])
 @is_connected
 def new_health_data(id: int):
-	# app.logger.debug(f'request.form: {request.form}')
 	patient = Patient.query.get_or_404(id)
-	# app.logger.debug(f'patient: {patient}')
 	if request.method == 'POST':
-		weight = request.form['weight']
-		height = request.form['height']
-		heart_rate = request.form['heart_rate']
-		blood_pressure_sys = int(request.form['blood_pressure_sys'])
-		blood_pressure_dia = int(request.form['blood_pressure_dia'])
-		temperature = float(request.form['temperature'])
-		notes = request.form['notes']
-		if not (weight and height and heart_rate and blood_pressure_sys and blood_pressure_dia and temperature):
-			flash('Please enter all the fields', 'error')
-		else:
-			health_data = HealthData(weight=weight, height=height, heart_rate=heart_rate, blood_pressure_sys=blood_pressure_sys, blood_pressure_dia=blood_pressure_dia, temperature=temperature, notes=notes, creation_date=datetime.now(), patient_id=id)
-			# logging.warning("See this message in Flask Debug Toolbar!")
-			db.session.add(health_data)
-			db.session.commit()
-			flash('Record was successfully added')
+		try:
+			weight = request.form['weight']
+			height = request.form['height']
+			heart_rate = request.form['heart_rate']
+			blood_pressure_sys = request.form['blood_pressure_sys']
+			blood_pressure_dia = request.form['blood_pressure_dia']
+			temperature = request.form['temperature']
+			notes = request.form['notes']
+			if not (weight and height and heart_rate and blood_pressure_sys and blood_pressure_dia and temperature):
+				flash('Please enter all the fields', 'error')
+			else:
+				health_data = HealthData(weight=safe_int(weight), height=safe_int(height), heart_rate=safe_int(heart_rate), blood_pressure_sys=safe_int(blood_pressure_sys), blood_pressure_dia=safe_int(blood_pressure_dia), temperature=float(temperature), notes=notes, creation_date=datetime.now(), patient_id=id)
+				# logging.warning("See this message in Flask Debug Toolbar!")
+				db.session.add(health_data)
+				db.session.commit()
+				flash('Record was successfully added')
+				return redirect(url_for('new_health_data', id=patient.id))
+		except Exception as e:
+			app.logger.error(f'Error: {str(e)}', exc_info=True)
+			flash(f'Error in form: {str(e)}', 'error')
+			# return render_template('new_health_data.html', patient=patient), 400
 	return render_template('new_health_data.html', patient=patient)
 
 
@@ -478,68 +482,12 @@ def show_health_data(id: int):
 
 
 @csrf.exempt
-@app.route('/new_blood_data_old/<int:id>', methods=['GET', 'POST'])
-@is_connected
-def new_blood_data_old(id: int):
-	# app.logger.debug(f'request.form: {request.form}')
-	patient = Patient.query.get_or_404(id)
-	# app.logger.debug(f'patient: {patient}')
-	if request.method == 'POST':
-		try:
-			date_analyse = request.form.get('date_analyse')
-			app.logger.debug(f'date_analyse: {date_analyse}')
-			date_analyse = datetime.strptime(date_analyse, '%Y-%m-%dT%H:%M') if date_analyse else datetime.now()
-			app.logger.debug(f'date_analyse: {date_analyse}')
-			hemoglobine = float(request.form['hemoglobine'])
-			hematocrite = float(request.form['hematocrite'])
-			globules_blancs = int(request.form['globules_blancs'])
-			globules_rouges = int(request.form['globules_rouges'])
-			plaquettes = int(request.form['plaquettes'])
-			creatinine = float(request.form['creatinine'])
-			uree = int(request.form['uree'])
-			glycemie = float(request.form['glycemie'])
-			cholesterol_total = float(request.form['cholesterol_total'])
-			hdl = float(request.form['hdl'])
-			ldl = float(request.form['ldl'])
-			triglycerides = float(request.form['triglycerides'])
-			tsh = float(request.form['tsh'])
-			psa = float(request.form['psa'])
-			alt = int(request.form['alt'])
-			ast = int(request.form['ast'])
-			fer = float(request.form['fer'])
-			vitamine_d = int(request.form['vitamine_d'])
-			blood_data = AnalyseSanguine(date_analyse=date_analyse, hemoglobine=hemoglobine, hematocrite=hematocrite, globules_blancs=globules_blancs, globules_rouges=globules_rouges, plaquettes=plaquettes, creatinine=creatinine, uree=uree, glycemie=glycemie, cholesterol_total=cholesterol_total, hdl=hdl, ldl=ldl, triglycerides=triglycerides, tsh=tsh, psa=psa, alt=alt, ast=ast, fer=fer, vitamine_d=vitamine_d, patient_id=id)
-			app.logger.debug(f'blood_data: {blood_data}')
-			db.session.add(blood_data)
-			db.session.commit()
-			flash('Record was successfully added')
-		except Exception as e:
-			app.logger.debug(f'error: {e}')
-			flash(f'Error in form: {e}', 'error')
-	return render_template('new_blood_data.html', patient=patient)
-
-
-@csrf.exempt
 @app.route('/new_blood_data/<int:id>', methods=['GET', 'POST'])
 @is_connected
 def new_blood_data(id: int):
 	patient = Patient.query.get_or_404(id)
-
 	if request.method == 'POST':
 		try:
-			# Helper function to safely convert values
-			def safe_float(value, default=None):
-				try:
-					return float(value) if value.strip() else default
-				except (ValueError, AttributeError):
-					return default
-
-			def safe_int(value, default=None):
-				try:
-					return int(value) if value.strip() else default
-				except (ValueError, AttributeError):
-					return default
-
 			# Handle date
 			date_analyse = request.form.get('date_analyse')
 			date_analyse = datetime.strptime(date_analyse, '%Y-%m-%dT%H:%M') if date_analyse else datetime.now()
@@ -551,6 +499,7 @@ def new_blood_data(id: int):
 			db.session.add(blood_data)
 			db.session.commit()
 			flash('Record was successfully added')
+			return redirect(url_for('new_blood_data', id=patient.id))
 
 		except Exception as e:
 			app.logger.error(f'Error: {str(e)}', exc_info=True)
