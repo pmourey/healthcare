@@ -100,7 +100,7 @@ def welcome():
 		user_agent_string = request.headers.get('User-Agent')
 		user_agent: UserAgent = parse(user_agent_string)
 		browser_info = f"Family = {user_agent.browser.family}, Version = {user_agent.browser.version_string}"
-		app.logger.debug(f"Client IP: {client_ip}, Browser: ({browser_info})")
+		# app.logger.debug(f"Client IP: {client_ip}, Browser: ({browser_info})")
 	return render_template('index.html', session=session, user=user, token=token)
 
 
@@ -168,7 +168,7 @@ def login():
 	error = None
 	if request.method == 'POST':
 		user = User.query.filter_by(username=request.form['username']).first()
-		app.logger.debug(f'user = {user.username} - clear pwd = {request.form["password"]}')
+		# app.logger.debug(f'user = {user.username} - clear pwd = {request.form["password"]}')
 		is_pass_ok = check_password_hash(user.password, request.form["password"])
 		app.logger.debug(f'user (login) = {user.username} - is_pass_ok = {is_pass_ok}')
 
@@ -178,7 +178,7 @@ def login():
 		if user and check_password_hash(stored_hash, password_attempt):
 			if user.validated:
 				session['login_id'] = user.id
-				app.logger.debug(f'user (login) = {user.username} - id = {user.id} - session: {session}')
+				# app.logger.debug(f'user (login) = {user.username} - id = {user.id} - session: {session}')
 				# client_ip = request.remote_addr
 				client_ip = get_client_ip()
 				user_agent_string = request.headers.get('User-Agent')
@@ -207,7 +207,7 @@ def change_password():
 		user = get_user_by_id(session['login_id'])
 		new_password: str = request.form["new_password"]
 		confirm_new_password: str = request.form["confirm_new_password"]
-		app.logger.debug(f'user (change pwd) = {user.username} - new pwd = {new_password} - confirm_new_pwd = {confirm_new_password}')
+		# app.logger.debug(f'user (change pwd) = {user.username} - new pwd = {new_password} - confirm_new_pwd = {confirm_new_password}')
 		if new_password == confirm_new_password:
 			try:
 				is_valid, error_message = validate_password_complexity(new_password)
@@ -250,7 +250,7 @@ def request_reset_password():
 
 			flash('Un e-mail de récupération de mot de passe a été envoyé.', 'success')
 			reset_link = url_for('reset_password', token=token, _external=True)
-			app.logger.debug(f'reset_link = {reset_link}')
+			# app.logger.debug(f'reset_link = {reset_link}')
 			send_password_recovery_email(app=app, reset_link=reset_link, user=user, author=app.config['GMAIL_FULLNAME'])
 			return redirect(url_for('login'))
 
@@ -266,15 +266,15 @@ def validate_email(token):
 	s = Serializer(app.config['SECRET_KEY'])
 	try:
 		data = s.loads(token)
-		app.logger.debug(f'data = {data}')
+		# app.logger.debug(f'data = {data}')
 		user = User.query.get_or_404(data['user_id'])
 		# Calculate the time difference
 		remaining_minutes = int((user.token_expiration - datetime.now()).total_seconds() / 60)
-		app.logger.debug(f'remaining minutes: {remaining_minutes}')
+		# app.logger.debug(f'remaining minutes: {remaining_minutes}')
 		if remaining_minutes <= 0:
 			raise Exception
 	except Exception as e:
-		app.logger.debug(e)
+		# app.logger.debug(e)
 		flash('Le lien de confirmation d\'inscription est invalide ou a expiré.')
 		user = User.query.get_or_404(data.get('user_id'))
 		if user:
@@ -308,7 +308,7 @@ def reset_password(token):
 		user = User.query.get_or_404(data['user_id'])
 		# Calculate the time difference
 		remaining_minutes = int((user.token_expiration - datetime.now()).total_seconds() / 60)
-		app.logger.debug(f'remaining minutes: {remaining_minutes}')
+		# app.logger.debug(f'remaining minutes: {remaining_minutes}')
 		if remaining_minutes <= 0:
 			raise Exception
 	except:
@@ -316,7 +316,7 @@ def reset_password(token):
 		return redirect(url_for('login'))
 
 	user = User.query.get(data['user_id'])
-	app.logger.debug(f'reset password user {user.username} - data = {data} \n - token = {token}')
+	# app.logger.debug(f'reset password user {user.username} - data = {data} \n - token = {token}')
 
 	if request.method == 'POST':
 		new_password = request.form.get('new_password')
@@ -378,10 +378,10 @@ def show_accounts():
 @is_connected
 @is_admin
 def delete_account(id):
-	app.logger.debug(f'Delete user #{id}')
+	# app.logger.debug(f'Delete user #{id}')
 	if request.method == 'GET':
 		user = User.query.get_or_404(id)
-		app.logger.debug(f'User debug: {user}')
+		# app.logger.debug(f'User debug: {user}')
 		db.session.delete(user)
 		db.session.commit()
 		flash(f'User \"{user.username}\" has been deleted!')
@@ -418,7 +418,7 @@ def show_sessions():
 @app.route('/new_patient/', methods=['GET', 'POST'])
 @is_connected
 def new_patient():
-	app.logger.debug(f'request.method: {request.method}')
+	# app.logger.debug(f'request.method: {request.method}')
 	if request.method == 'POST':
 		first_name = request.form['firstname']
 		last_name = request.form['lastname']
@@ -468,7 +468,7 @@ def new_health_data(id: int):
 				flash('Record was successfully added')
 				return redirect(url_for('new_health_data', id=patient.id))
 		except Exception as e:
-			app.logger.error(f'Error: {str(e)}', exc_info=True)
+			# app.logger.error(f'Error: {str(e)}', exc_info=True)
 			flash(f'Error in form: {str(e)}', 'error')
 			# return render_template('new_health_data.html', patient=patient), 400
 	return render_template('new_health_data.html', patient=patient)
@@ -513,14 +513,14 @@ def new_blood_data(id: int):
 			# Create blood data object with safe conversions
 			blood_data = AnalyseSanguine(date_analyse=date_analyse, hemoglobine=safe_float(request.form.get('hemoglobine')), hematocrite=safe_float(request.form.get('hematocrite')), globules_blancs=safe_int(request.form.get('globules_blancs')), globules_rouges=safe_int(request.form.get('globules_rouges')), plaquettes=safe_int(request.form.get('plaquettes')), creatinine=safe_float(request.form.get('creatinine')), uree=safe_int(request.form.get('uree')), glycemie=safe_float(request.form.get('glycemie')), cholesterol_total=safe_float(request.form.get('cholesterol_total')), hdl=safe_float(request.form.get('hdl')), ldl=safe_float(request.form.get('ldl')), triglycerides=safe_float(request.form.get('triglycerides')), tsh=safe_float(request.form.get('tsh')), psa=safe_float(request.form.get('psa')), alt=safe_int(request.form.get('alt')), ast=safe_int(request.form.get('ast')), fer=safe_float(request.form.get('fer')), vitamine_d=safe_int(request.form.get('vitamine_d')), patient_id=id)
 
-			app.logger.debug(f'blood_data: {blood_data}')
+			# app.logger.debug(f'blood_data: {blood_data}')
 			db.session.add(blood_data)
 			db.session.commit()
 			flash('Record was successfully added')
 			return redirect(url_for('new_blood_data', id=patient.id))
 
 		except Exception as e:
-			app.logger.error(f'Error: {str(e)}', exc_info=True)
+			# app.logger.error(f'Error: {str(e)}', exc_info=True)
 			flash(f'Error in form: {str(e)}', 'error')
 
 	return render_template('new_blood_data.html', patient=patient, limits=app.config['LIMITS'])
@@ -539,7 +539,7 @@ def show_patients():
 	user = get_user_by_id(session['login_id'])
 	patients = Patient.query.filter_by(user_id=user.id).order_by(desc(Patient.id)).all()
 	# patients = Patient.query.order_by(desc(Patient.id)).all()
-	app.logger.debug(f'patients: {patients}')
+	# app.logger.debug(f'patients: {patients}')
 	return render_template('patients.html', patients=patients, user=user)
 
 
@@ -716,7 +716,7 @@ def generate_graphs():
 			if values:  # Vérifie si la liste n'est pas vide
 				selected_health_data['markers'][marker] = {'values': values, 'display_name': display_name, 'unit': marker_units.get(marker, ''), 'limits': {'min': app.config['LIMITS'][marker]['min'], 'max': app.config['LIMITS'][marker]['max']}}
 
-	app.logger.debug(f'selected_health_data: {selected_health_data}')
+	# app.logger.debug(f'selected_health_data: {selected_health_data}')
 
 	# Récupération des données sanguines sélectionnées
 	for marker in blood_markers:
@@ -734,7 +734,7 @@ def generate_graphs():
 			if values:
 				selected_blood_data['markers'][marker] = {'values': values, 'display_name': display_name, 'unit': marker_units.get(marker, ''), 'limits': {'min': app.config['LIMITS'][marker]['min'], 'max': app.config['LIMITS'][marker]['max']}}
 
-	app.logger.debug(f'selected_blood_data: {selected_blood_data}')
+	# app.logger.debug(f'selected_blood_data: {selected_blood_data}')
 
 	# Conversion des données en format JSON-compatible
 	return render_template('patient_report.html', patient=patient, today=datetime.now().strftime('%d/%m/%Y'), health_data=selected_health_data, blood_data=selected_blood_data, selected_health_markers=health_markers, selected_blood_markers=blood_markers)
