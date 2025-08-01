@@ -492,23 +492,23 @@ def new_blood_data(id: int):
 			date_analyse = request.form.get('date_analyse')
 			date_analyse = datetime.strptime(date_analyse, '%Y-%m-%dT%H:%M') if date_analyse else datetime.now()
 
-			MANDATORY_MARKERS = ['hemoglobine',  # Hemoglobin level
-				'hematocrite',  # Hematocrit
-				'globules_blancs',  # White blood cells
-				'globules_rouges',  # Red blood cells
-				'plaquettes',  # Platelets
-				'creatinine',  # Kidney function
-				'glycemie',  # Blood sugar
-			]
-
-			# Validation before creating AnalyseSanguine
-			mandatory_values = {marker: request.form.get(marker) for marker in MANDATORY_MARKERS}
-
-			# Check if any mandatory field is empty
-			missing_fields = [marker for marker, value in mandatory_values.items() if not value or value.strip() == ""]
-
-			if missing_fields:
-				raise Exception(f"Les champs suivants sont obligatoires : {', '.join(missing_fields)}")
+			# MANDATORY_MARKERS = ['hemoglobine',  # Hemoglobin level
+			# 	'hematocrite',  # Hematocrit
+			# 	'globules_blancs',  # White blood cells
+			# 	'globules_rouges',  # Red blood cells
+			# 	'plaquettes',  # Platelets
+			# 	'creatinine',  # Kidney function
+			# 	'glycemie',  # Blood sugar
+			# ]
+			#
+			# # Validation before creating AnalyseSanguine
+			# mandatory_values = {marker: request.form.get(marker) for marker in MANDATORY_MARKERS}
+			#
+			# # Check if any mandatory field is empty
+			# missing_fields = [marker for marker, value in mandatory_values.items() if not value or value.strip() == ""]
+			#
+			# if missing_fields:
+			# 	raise Exception(f"Les champs suivants sont obligatoires : {', '.join(missing_fields)}")
 
 			# Create blood data object with safe conversions
 			blood_data = AnalyseSanguine(date_analyse=date_analyse, hemoglobine=safe_float(request.form.get('hemoglobine')), hematocrite=safe_float(request.form.get('hematocrite')), globules_blancs=safe_int(request.form.get('globules_blancs')), globules_rouges=safe_int(request.form.get('globules_rouges')), plaquettes=safe_int(request.form.get('plaquettes')), creatinine=safe_float(request.form.get('creatinine')), uree=safe_int(request.form.get('uree')), glycemie=safe_float(request.form.get('glycemie')), cholesterol_total=safe_float(request.form.get('cholesterol_total')), hdl=safe_float(request.form.get('hdl')), ldl=safe_float(request.form.get('ldl')), triglycerides=safe_float(request.form.get('triglycerides')), tsh=safe_float(request.form.get('tsh')), psa=safe_float(request.form.get('psa')), alt=safe_int(request.form.get('alt')), ast=safe_int(request.form.get('ast')), fer=safe_float(request.form.get('fer')), vitamine_d=safe_int(request.form.get('vitamine_d')), patient_id=id)
