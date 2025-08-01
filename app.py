@@ -680,63 +680,62 @@ def generate_graphs():
 	health_data = HealthData.query.filter_by(patient_id=patient.id).order_by(HealthData.creation_date).all()
 	blood_data = AnalyseSanguine.query.filter_by(patient_id=patient.id).order_by(AnalyseSanguine.date_analyse).all()
 
-	# Dictionnaires pour stocker les données sélectionnées
-	selected_health_data = {'dates': [data.creation_date.strftime('%d/%m/%Y') for data in health_data], 'markers': {}}
+	# Structure date-marker pour les données de santé
+	health_entries = []
+	for data in health_data:
+		entry = {'date': data.creation_date.strftime('%d/%m/%Y')}
+		for marker in health_markers:
+			if marker in {'weight': 'weight', 'height': 'height', 'imc': 'imc', 'temperature': 'temperature', 'systolic_bp': 'blood_pressure_sys', 'diastolic_bp': 'blood_pressure_dia', 'heart_rate': 'heart_rate'}:
+				attr_name = {'weight': 'weight', 'height': 'height', 'imc': 'imc', 'temperature': 'temperature', 'systolic_bp': 'blood_pressure_sys', 'diastolic_bp': 'blood_pressure_dia', 'heart_rate': 'heart_rate'}[marker]
+				try:
+					val = data.imc if attr_name == 'imc' else getattr(data, attr_name)
+					entry[marker] = float(val) if val is not None else None
+				except (ValueError, TypeError, AttributeError):
+					entry[marker] = None
+		health_entries.append(entry)
 
-	selected_blood_data = {'dates': [data.date_analyse.strftime('%d/%m/%Y') for data in blood_data], 'markers': {}}
+	# Structure date-marker pour les données sanguines
+	blood_entries = []
+	for data in blood_data:
+		entry = {'date': data.date_analyse.strftime('%d/%m/%Y')}
+		for marker in blood_markers:
+			try:
+				val = getattr(data, marker)
+				entry[marker] = float(val) if val is not None else None
+			except (ValueError, TypeError, AttributeError):
+				entry[marker] = None
+		blood_entries.append(entry)
 
-	# Mapping des marqueurs de santé selon le template
-	health_marker_mapping = {'weight': ('weight', 'Poids'), 'height': ('height', 'Taille'), 'imc': ('imc', 'IMC'), 'temperature': ('temperature', 'Température'), 'systolic_bp': ('blood_pressure_sys', 'Tension systolique'), 'diastolic_bp': ('blood_pressure_dia', 'Tension diastolique'), 'heart_rate': ('heart_rate', 'Fréquence cardiaque')}
+	# Conversion vers le format attendu par le template
+	selected_health_data = {'dates': [e['date'] for e in health_entries], 'markers': {}}
+	selected_blood_data = {'dates': [e['date'] for e in blood_entries], 'markers': {}}
 
-	# Mapping des marqueurs sanguins selon le template
-	blood_marker_mapping = {'hemoglobine': ('hemoglobine', 'Hémoglobine'), 'hematocrite': ('hematocrite', 'Hématocrite'), 'globules_blancs': ('globules_blancs', 'Globules blancs'), 'globules_rouges': ('globules_rouges', 'Globules rouges'), 'plaquettes': ('plaquettes', 'Plaquettes'), 'creatinine': ('creatinine', 'Créatinine'), 'uree': ('uree', 'Urée (Acide urique)'), 'glycemie': ('glycemie', 'Glycémie'), 'cholesterol_total': ('cholesterol_total', 'Cholestérol total'), 'hdl': ('hdl', 'HDL'), 'ldl': ('ldl', 'LDL'), 'triglycerides': ('triglycerides', 'Triglycérides'), 'tsh': ('tsh', 'TSH'), 'psa': ('psa', 'PSA'), 'alt': ('alt', 'ALT (Transaminases SGPT)'), 'ast': ('ast', 'AST (Transaminases SGOT)'), 'fer': ('fer', 'Fer'), 'vitamine_d': ('vitamine_d', 'Vitamine D')}
+	marker_config = {
+		'weight': ('Poids', 'kg'), 'height': ('Taille', 'cm'), 'imc': ('IMC', 'kg/m2'),
+		'temperature': ('Température', '°C'), 'systolic_bp': ('Tension systolique', 'mmHg'),
+		'diastolic_bp': ('Tension diastolique', 'mmHg'), 'heart_rate': ('Fréquence cardiaque', 'bpm'),
+		'hemoglobine': ('Hémoglobine', 'g/dL'), 'hematocrite': ('Hématocrite', '%'),
+		'globules_blancs': ('Globules blancs', '/mm³'), 'glycemie': ('Glycémie', 'g/L')
+	}
 
-	# Unités pour chaque marqueur
-	marker_units = {'weight': 'kg', 'height': 'cm', 'imc': 'kg/m2', 'temperature': '°C', 'systolic_bp': 'mmHg', 'diastolic_bp': 'mmHg', 'heart_rate': 'bpm', 'hemoglobine': 'g/dL', 'hematocrite': '%', 'globules_blancs': '/mm³', 'globules_rouges': '/mm³', 'plaquettes': '/mm³', 'creatinine': 'mg/L', 'uree': 'mg/L', 'glycemie': 'g/L', 'cholesterol_total': 'g/L', 'hdl': 'g/L', 'ldl': 'g/L', 'triglycerides': 'g/L', 'tsh': 'mUI/L', 'psa': 'ng/mL', 'alt': 'UI/L', 'ast': 'UI/L', 'fer': 'µg/dL', 'vitamine_d': 'ng/mL'}
-
-	# Récupération des données de santé sélectionnées
 	for marker in health_markers:
-		if marker in health_marker_mapping:
-			attr_name, display_name = health_marker_mapping[marker]
-			# Conversion explicite des valeurs en liste de nombres
-			values = []
-			for data in health_data:
-				try:
-					if attr_name == 'imc':
-						val = data.imc  # Utilise la propriété imc
-					else:
-						val = getattr(data, attr_name)
-					# Convertir en float si possible, sinon None
-					values.append(float(val))  # values.append(float(val) if val is not None else None)
-				except (ValueError, TypeError, AttributeError):
-					# values.append(None)
-					continue  # Ignore les valeurs problématiques
+		values = [e.get(marker) for e in health_entries]
+		if any(v is not None for v in values):
+			display_name, unit = marker_config.get(marker, (marker, ''))
+			selected_health_data['markers'][marker] = {
+				'values': values, 'display_name': display_name, 'unit': unit,
+				'limits': {'min': app.config['LIMITS'][marker]['min'], 'max': app.config['LIMITS'][marker]['max']}
+			}
 
-			# Ne crée l'entrée que si des valeurs existent
-			if values:  # Vérifie si la liste n'est pas vide
-				selected_health_data['markers'][marker] = {'values': values, 'display_name': display_name, 'unit': marker_units.get(marker, ''), 'limits': {'min': app.config['LIMITS'][marker]['min'], 'max': app.config['LIMITS'][marker]['max']}}
-
-	# app.logger.debug(f'selected_health_data: {selected_health_data}')
-
-	# Récupération des données sanguines sélectionnées
 	for marker in blood_markers:
-		if marker in blood_marker_mapping:
-			attr_name, display_name = blood_marker_mapping[marker]
-			# Conversion explicite des valeurs en liste de nombres
-			values = []
-			for data in blood_data:
-				try:
-					val = getattr(data, attr_name)
-					values.append(float(val))
-				except (ValueError, TypeError, AttributeError):
-					continue
+		values = [e.get(marker) for e in blood_entries]
+		if any(v is not None for v in values):
+			display_name, unit = marker_config.get(marker, (marker, ''))
+			selected_blood_data['markers'][marker] = {
+				'values': values, 'display_name': display_name, 'unit': unit,
+				'limits': {'min': app.config['LIMITS'][marker]['min'], 'max': app.config['LIMITS'][marker]['max']}
+			}
 
-			if values:
-				selected_blood_data['markers'][marker] = {'values': values, 'display_name': display_name, 'unit': marker_units.get(marker, ''), 'limits': {'min': app.config['LIMITS'][marker]['min'], 'max': app.config['LIMITS'][marker]['max']}}
-
-	# app.logger.debug(f'selected_blood_data: {selected_blood_data}')
-
-	# Conversion des données en format JSON-compatible
 	return render_template('patient_report.html', patient=patient, today=datetime.now().strftime('%d/%m/%Y'), health_data=selected_health_data, blood_data=selected_blood_data, selected_health_markers=health_markers, selected_blood_markers=blood_markers)
 
 
