@@ -14,7 +14,8 @@ function createChartConfig(chartId, labels, markerInfo) {
                 data: markerInfo.values,
                 borderColor: chartColors.main,
                 tension: 0.1,
-                fill: false
+                fill: false,
+                spanGaps: true
             },
             {
                 label: 'Limite maximale',
