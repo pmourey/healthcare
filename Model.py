@@ -58,6 +58,8 @@ class Patient(db.Model):
 	health_data = relationship('HealthData', backref='patient', cascade='all, delete-orphan')
 	blood_data = relationship('AnalyseSanguine', backref='patient', cascade='all, delete-orphan')
 
+	def __repr__(self):
+		return f'{self.first_name} {self.last_name.upper()[0]}.'
 
 class AnalyseSanguine(db.Model):
 	__tablename__ = 'analyses'
