@@ -23,6 +23,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from Controller import get_user_by_id, check, send_confirmation_email, send_password_recovery_email, get_session_by_login, validate_password_complexity, end_other_sessions, safe_float, safe_int
 from Model import User, db, Session, Patient, HealthData, AnalyseSanguine
+from flask_migrate import Migrate
 
 import secrets
 from itsdangerous import URLSafeSerializer, Serializer
@@ -46,7 +47,7 @@ app.config.from_object('config.Config')
 app.config.from_object('config.Medical')
 # Initialize extensions
 db.init_app(app)
-# migrate.init_app(app, db)
+migrate = Migrate(app, db)
 
 # Locale settings
 locale.setlocale(locale.LC_TIME, 'fr_FR')
@@ -424,7 +425,10 @@ def new_patient():
 		last_name = request.form['lastname']
 		email = request.form['email']
 		phone = request.form['phone']
-		if not (first_name and last_name and email and phone):
+		birth_date = request.form['birth_date']
+		birth_date = datetime.strptime(birth_date, '%Y-%m-%d')
+		gender = request.form['gender']
+		if not (first_name and last_name and email and phone and birth_date and gender ):
 			flash('Please enter all the fields', 'error')
 		else:
 			# check if patient already exists by first_name and last_name
@@ -434,7 +438,7 @@ def new_patient():
 			else:
 				# patient = Patient(first_name=first_name.capitalize(), last_name=last_name.capitalize(), email=email, phone=phone, creation_date=datetime.now())
 				user = get_user_by_id(session['login_id'])
-				patient = Patient(first_name=first_name.capitalize(), last_name=last_name.capitalize(), email=email, phone=phone, creation_date=datetime.now(), user_id=user.id)
+				patient = Patient(first_name=first_name.capitalize(), last_name=last_name.capitalize(), email=email, phone=phone, birth_date=birth_date, gender=gender, creation_date=datetime.now(), user_id=user.id)
 				# logging.warning("See this message in Flask Debug Toolbar!")
 				db.session.add(patient)
 				db.session.commit()
@@ -733,7 +737,7 @@ def generate_graphs():
 			display_name, unit = marker_config.get(marker, (marker, ''))
 			selected_blood_data['markers'][marker] = {
 				'values': values, 'display_name': display_name, 'unit': unit,
-				'limits': {'min': app.config['LIMITS'][marker]['min'], 'max': app.config['LIMITS'][marker]['max']}
+				'limits': {'min': app.config['LIMITS'][marker][patient.gender]['min'], 'max': app.config['LIMITS'][marker][patient.gender]['max']}
 			}
 
 	return render_template('patient_report.html', patient=patient, today=datetime.now().strftime('%d/%m/%Y'), health_data=selected_health_data, blood_data=selected_blood_data, selected_health_markers=health_markers, selected_blood_markers=blood_markers)

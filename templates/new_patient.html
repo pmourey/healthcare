@@ -64,7 +64,7 @@
                         </div>
 
                         <!-- Téléphone -->
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <div class="form-floating">
                                 <input type="tel" 
                                        class="form-control" 
@@ -79,6 +79,40 @@
                                 <div class="invalid-feedback">
                                     Veuillez entrer un numéro de téléphone valide (ex: 06 12 34 56 78)
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Date de naissance -->
+                        <div class="mb-3">
+                            <div class="form-floating">
+                                <input type="date" 
+                                       class="form-control" 
+                                       id="birth_date"
+                                       name="birth_date" 
+                                       placeholder="Date de naissance"
+                                       value="{{ request.form.birth_date }}">
+                                <label for="birth_date">Date de naissance</label>
+                                <div class="invalid-feedback">
+                                    Veuillez entrer une date de naissance
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Genre -->
+                        <div class="mb-4" id="gender-group">
+                            <label class="form-label">Genre</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="gender" id="gender_f" value="F">
+                                    <label class="form-check-label" for="gender_f">Femme</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="gender" id="gender_m" value="M">
+                                    <label class="form-check-label" for="gender_m">Homme</label>
+                                </div>
+                            </div>
+                            <div class="invalid-feedback" style="display: none;">
+                                Veuillez sélectionner un genre
                             </div>
                         </div>
 
@@ -104,13 +138,27 @@
 </div>
 
 <script>
-// Activation de la validation Bootstrap
 (function () {
     'use strict'
     var forms = document.querySelectorAll('.needs-validation')
     Array.prototype.slice.call(forms)
         .forEach(function (form) {
             form.addEventListener('submit', function (event) {
+                var genderSelected = form.querySelector('input[name="gender"]:checked')
+                var genderGroup = document.getElementById('gender-group')
+                var invalidFeedback = genderGroup.querySelector('.invalid-feedback')
+                
+                if (!genderSelected) {
+                    genderGroup.classList.add('is-invalid')
+                    invalidFeedback.style.display = 'block'
+                    event.preventDefault()
+                    event.stopPropagation()
+                    return false
+                } else {
+                    genderGroup.classList.remove('is-invalid')
+                    invalidFeedback.style.display = 'none'
+                }
+                
                 if (!form.checkValidity()) {
                     event.preventDefault()
                     event.stopPropagation()

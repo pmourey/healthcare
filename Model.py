@@ -52,11 +52,30 @@ class Patient(db.Model):
 	# email = Column(String(120), unique=True, nullable=False)
 	email = Column(String(120), nullable=False)
 	phone = Column(String(20), nullable=False)
+	birth_date = Column(DateTime, nullable=False)
+	gender = Column(String(1), nullable=False)
 	creation_date = Column(DateTime, nullable=False)
 	user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
 
 	health_data = relationship('HealthData', backref='patient', cascade='all, delete-orphan')
 	blood_data = relationship('AnalyseSanguine', backref='patient', cascade='all, delete-orphan')
+
+	@property
+	def age(self):
+		return relativedelta(datetime.now(), self.birth_date).years
+
+	@property
+	def seniority(self) -> str:
+		delta = relativedelta(datetime.now(), self.creation_date)
+		if delta.years > 0:
+			return f"{delta.years} an{'s' if delta.years > 1 else ''}"
+		if delta.months > 0:
+			return f"{delta.months} mois"
+		if delta.days >= 7:
+			w = delta.days // 7
+			return f"{w} semaine{'s' if w > 1 else ''}"
+		d = delta.days
+		return f"{d} jour{'s' if d > 1 else ''}"
 
 	def __repr__(self):
 		return f'{self.first_name} {self.last_name.upper()[0]}.'

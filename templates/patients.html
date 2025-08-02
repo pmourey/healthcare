@@ -13,7 +13,8 @@
                     <th>Actions</th>
                     <th>Nom</th>
                     <th>Contact</th>
-                    <th>Date création</th>
+                    <th>Âge/Genre</th>
+                    <th>Ancienneté</th>
                 </tr>
             </thead>
             <tbody>
@@ -59,7 +60,12 @@
                             <i class="bi bi-telephone"></i> {{ patient.phone }}
                         </a>
                     </td>
-                    <td>{{patient.creation_date.strftime('%d/%m/%Y')}}</td>
+                    <td>
+                        {% if patient.age %}{{ patient.age }} ans{% endif %}
+                        {% if patient.gender %}({{ 'F' if patient.gender == 'F' else 'H' }}){% endif %}
+                    </td>
+<!--                    <td>{{patient.creation_date.strftime('%d/%m/%Y')}}</td>-->
+                    <td>{{ patient.seniority }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
