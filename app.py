@@ -23,7 +23,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from Controller import get_user_by_id, check, send_confirmation_email, send_password_recovery_email, get_session_by_login, validate_password_complexity, end_other_sessions, safe_float, safe_int
 from Model import User, db, Session, Patient, HealthData, AnalyseSanguine
-# from flask_migrate import Migrate
+from flask_migrate import Migrate
 
 import secrets
 from itsdangerous import URLSafeSerializer, Serializer
@@ -714,18 +714,10 @@ def generate_graphs():
 	selected_health_data = {'dates': [e['date'] for e in health_entries], 'markers': {}}
 	selected_blood_data = {'dates': [e['date'] for e in blood_entries], 'markers': {}}
 
-	marker_config = {
-		'weight': ('Poids', 'kg'), 'height': ('Taille', 'cm'), 'imc': ('IMC', 'kg/m2'),
-		'temperature': ('Température', '°C'), 'systolic_bp': ('Tension systolique', 'mmHg'),
-		'diastolic_bp': ('Tension diastolique', 'mmHg'), 'heart_rate': ('Fréquence cardiaque', 'bpm'),
-		'hemoglobine': ('Hémoglobine', 'g/dL'), 'hematocrite': ('Hématocrite', '%'),
-		'globules_blancs': ('Globules blancs', '/mm³'), 'glycemie': ('Glycémie', 'g/L')
-	}
-
 	for marker in health_markers:
 		values = [e.get(marker) for e in health_entries]
 		if any(v is not None for v in values):
-			display_name, unit = marker_config.get(marker, (marker, ''))
+			display_name, unit = app.config['LIMITS'][marker]['display'], app.config['LIMITS'][marker]['unit']
 			selected_health_data['markers'][marker] = {
 				'values': values, 'display_name': display_name, 'unit': unit,
 				'limits': {'min': app.config['LIMITS'][marker]['min'], 'max': app.config['LIMITS'][marker]['max']}
@@ -734,7 +726,7 @@ def generate_graphs():
 	for marker in blood_markers:
 		values = [e.get(marker) for e in blood_entries]
 		if any(v is not None for v in values):
-			display_name, unit = marker_config.get(marker, (marker, ''))
+			display_name, unit = app.config['LIMITS'][marker]['display'], app.config['LIMITS'][marker]['unit']
 			selected_blood_data['markers'][marker] = {
 				'values': values, 'display_name': display_name, 'unit': unit,
 				'limits': {'min': app.config['LIMITS'][marker][patient.gender]['min'], 'max': app.config['LIMITS'][marker][patient.gender]['max']}
