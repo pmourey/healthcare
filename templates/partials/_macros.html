@@ -1,8 +1,8 @@
-{% macro display_value(data, marker, medical_limits) %}
+{% macro display_value(data, marker, medical_limits, gender) %}
     {# Get the limits for the marker #}
     {% set limits = medical_limits.get(marker, {}) %}
-    {% set min_val = limits.get('min') %}
-    {% set max_val = limits.get('max') %}
+    {% set min_val = limits.get(gender).get('min') if gender else limits.get('min') %}
+    {% set max_val = limits.get(gender).get('max') if gender else limits.get('max') %}
     {% set unit = limits.get('unit', '') %}
 
     {% if data is none %}
