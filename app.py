@@ -23,7 +23,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from Controller import get_user_by_id, check, send_confirmation_email, send_password_recovery_email, get_session_by_login, validate_password_complexity, end_other_sessions, safe_float, safe_int
 from Model import User, db, Session, Patient, HealthData, AnalyseSanguine
-from flask_migrate import Migrate
+#from flask_migrate import Migrate
 
 import secrets
 from itsdangerous import URLSafeSerializer, Serializer
