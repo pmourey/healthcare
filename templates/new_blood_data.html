@@ -27,7 +27,7 @@
                                     <label class="form-label mb-0">Hémoglobine</label>
                                 </div>
                                 <input type="number" step="0.1" class="form-control"
-                                       placeholder="{{ limits['hemoglobine']['min'] }}-{{ limits['hemoglobine']['max'] }} {{ limits['hemoglobine']['unit'] }}" name="hemoglobine"
+                                       placeholder="{{ limits['hemoglobine'][patient.gender]['min'] }}-{{ limits['hemoglobine'][patient.gender]['max'] }} {{ limits['hemoglobine']['unit'] }}" name="hemoglobine"
                                        value="{{ request.form.hemoglobine }}">
                             </div>
                             <div class="mb-3">
