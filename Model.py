@@ -94,6 +94,7 @@ class AnalyseSanguine(db.Model):
 	globules_rouges = Column(Integer)  # /mm3
 	plaquettes = Column(Integer)  # /mm3
 	creatinine = Column(Float)  # mg/L
+	ckd_epi = Column(Integer)	# ml/min/1,73 m²
 	uree = Column(Integer)  # mg/L
 	glycemie = Column(Float)  # g/L
 	cholesterol_total = Column(Float)  # g/L
