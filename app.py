@@ -465,7 +465,7 @@ def new_health_data(id: int):
 			if not (weight and height and heart_rate and blood_pressure_sys and blood_pressure_dia and temperature):
 				flash('Please enter all the fields', 'error')
 			else:
-				health_data = HealthData(weight=safe_int(weight), height=safe_int(height), heart_rate=safe_int(heart_rate), blood_pressure_sys=safe_int(blood_pressure_sys), blood_pressure_dia=safe_int(blood_pressure_dia), temperature=float(temperature), notes=notes, creation_date=datetime.now(), patient_id=id)
+				health_data = HealthData(weight=safe_float(weight), height=safe_int(height), heart_rate=safe_int(heart_rate), blood_pressure_sys=safe_int(blood_pressure_sys), blood_pressure_dia=safe_int(blood_pressure_dia), temperature=safe_float(temperature), notes=notes, creation_date=datetime.now(), patient_id=id)
 				# logging.warning("See this message in Flask Debug Toolbar!")
 				db.session.add(health_data)
 				db.session.commit()
