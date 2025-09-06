@@ -47,7 +47,7 @@ app.config.from_object('config.Config')
 app.config.from_object('config.Medical')
 # Initialize extensions
 db.init_app(app)
-migrate = Migrate(app, db)
+# migrate = Migrate(app, db)
 
 # Locale settings
 locale.setlocale(locale.LC_TIME, 'fr_FR')
