@@ -8,6 +8,16 @@
     <div class="row">
         <div class="col-lg-6 mx-auto">
             <form method="POST" action="{{ url_for('new_health_data', id=patient.id) }}" class="needs-validation" novalidate>
+                <!-- Date de l'examen -->
+                <div class="mb-3">
+                    <div class="form-floating">
+                        <input type="datetime-local" class="form-control" id="date_examen" 
+                               name="date_examen" value="{{ request.form.get('date_examen', default_date) }}"
+                               placeholder="Date de l'examen">
+                        <label for="date_examen">Date de l'examen</label>
+                    </div>
+                </div>
+
                 <!-- Mesures physiques -->
                 <div class="row g-3 mb-3">
                     <div class="col-sm-6">

@@ -23,7 +23,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from Controller import get_user_by_id, check, send_confirmation_email, send_password_recovery_email, get_session_by_login, validate_password_complexity, end_other_sessions, safe_float, safe_int
 from Model import User, db, Session, Patient, HealthData, AnalyseSanguine
-# from flask_migrate import Migrate
+from flask_migrate import Migrate
 
 import secrets
 from itsdangerous import URLSafeSerializer, Serializer
@@ -47,7 +47,7 @@ app.config.from_object('config.Config')
 app.config.from_object('config.Medical')
 # Initialize extensions
 db.init_app(app)
-# migrate = Migrate(app, db)
+migrate = Migrate(app, db)
 
 # Locale settings
 locale.setlocale(locale.LC_TIME, 'fr_FR')
@@ -58,6 +58,8 @@ login_manager.login_view = 'login'
 
 csrf = CSRFProtect(app)
 
+# Add datetime to Jinja globals
+app.jinja_env.globals['datetime'] = datetime
 
 # Add the filter to the Jinja environment
 
@@ -462,11 +464,13 @@ def new_health_data(id: int):
 			blood_pressure_dia = request.form['blood_pressure_dia']
 			temperature = request.form['temperature']
 			notes = request.form['notes']
+			date_examen = request.form.get('date_examen')
+			date_examen = datetime.strptime(date_examen, '%Y-%m-%dT%H:%M') if date_examen else datetime.now()
+			
 			if not (weight and height and heart_rate and blood_pressure_sys and blood_pressure_dia and temperature):
 				flash('Please enter all the fields', 'error')
 			else:
-				health_data = HealthData(weight=safe_float(weight), height=safe_int(height), heart_rate=safe_int(heart_rate), blood_pressure_sys=safe_int(blood_pressure_sys), blood_pressure_dia=safe_int(blood_pressure_dia), temperature=safe_float(temperature), notes=notes, creation_date=datetime.now(), patient_id=id)
-				# logging.warning("See this message in Flask Debug Toolbar!")
+				health_data = HealthData(weight=safe_float(weight), height=safe_int(height), heart_rate=safe_int(heart_rate), blood_pressure_sys=safe_int(blood_pressure_sys), blood_pressure_dia=safe_int(blood_pressure_dia), temperature=safe_float(temperature), notes=notes, creation_date=date_examen, patient_id=id)
 				db.session.add(health_data)
 				db.session.commit()
 				flash('Record was successfully added')
@@ -475,7 +479,7 @@ def new_health_data(id: int):
 			# app.logger.error(f'Error: {str(e)}', exc_info=True)
 			flash(f'Error in form: {str(e)}', 'error')
 			# return render_template('new_health_data.html', patient=patient), 400
-	return render_template('new_health_data.html', patient=patient)
+	return render_template('new_health_data.html', patient=patient, default_date=datetime.now().strftime('%Y-%m-%dT%H:%M'))
 
 
 @app.route('/show_health_data/<int:id>')
